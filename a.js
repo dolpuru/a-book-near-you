@@ -1,9 +1,10 @@
-import axios from 'axios'
-import cheerio from 'cheerio'
-const axios = require("axios");
-const cheerio = require("cheerio");
+//import axios from 'axios'
+//import cheerio from 'cheerio'
 
-axios.get("http://example.com/")
+const axios2 = require("axios");
+const cheerio2 = require("cheerio");
+
+axios2.get("http://example.com/")
     .then((response) => {
         const htmlString = response.data;
         const $ = cheerio.load(htmlString);
