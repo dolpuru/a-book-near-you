@@ -1,31 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <script src="https://requirejs.org/docs/release/2.3.5/minified/require.js"></script>
-    <script>
-        // import cheerio from 'cheerio'
 
- axios
-        .get("https://jsonplaceholder.typicode.com/todos/1")
-        .then(function (result) {
-        console.log("통신 결과 : ", result);
-        console.log("status : ", result.status);
-        console.log("data : ", result.data);
-        })
-        .catch(function (error) {
-        console.log("에러 발생 : ", error);
-        });
-        console.log("바로 실행 로그");
-    </script>
 
-    <!-- <script type="module" src="./a.js"></script> -->
+    <script src="./crawler.js"></script>
     <meta charset="UTF-8">
 
     <title>Document</title>
 </head>
+
 <body>
     hi
 </body>
+
 </html>
