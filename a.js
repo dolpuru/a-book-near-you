@@ -1,5 +1,5 @@
-// import axios from 'axios'
-// import cheerio from 'cheerio'
+import axios from 'axios'
+import cheerio from 'cheerio'
 const axios = require("axios");
 const cheerio = require("cheerio");
 
