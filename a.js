@@ -3,7 +3,7 @@
 // import cheerio from 'cheerio'
 // const cheerio = require("cheerio");
 
-import cheerio from 'cheerio'
+import cheerio from './cheerio'
 
 axios.get("http://example.com/")
     .then((response) => {
