@@ -71,10 +71,37 @@ axios.get("https://mobile.kyobobook.co.kr/welcomeStore/storeSearchDetail?siteCod
 });
 console.log("바로 실행 로그");
 
+// 아래 코드로 영업시간 전화번호 휴무일 확인가능 위치 좌표 가능
+axios.get("http://www.kyobobook.co.kr/storen/MainStore.laf?SITE=15&Kc=GNHHNOoffstore&orderClick=rvd").then(function (result) {
+    console.log("통신 결과 : ", result);
+}).catch(function (error) {
+    console.log("에러 발생 : ", error);
+});
+console.log("바로 실행 로그");
 */
 
-// 아래 코드로 영업시간 전화번호 휴무일 확인가능 위치 좌표 가능
-// axios.get("http://www.kyobobook.co.kr/storen/MainStore.laf?SITE=15&Kc=GNHHNOoffstore&orderClick=rvd").then(function (result) {
+
+
+// yes24 책 검색시 나오는 리스트들에 대해 지점별 재고 확인가능
+// 지점별 위치는 ? 매장시간은 ? 전화번호는 ?
+// axios.get("http://www.yes24.com/Product/Search?domain=STORE&query=%EB%91%90%20%EB%8F%84%EC%8B%9C%20%EC%9D%B4%EC%95%BC%EA%B8%B0").then(function (result) {
+//     console.log("통신 결과 : ", result);
+// }).catch(function (error) {
+//     console.log("에러 발생 : ", error);
+// });
+// console.log("바로 실행 로그");
+
+// yes24 매점들 불러오는거
+// axios.get("http://www.yes24.com/Mall/UsedStore/Detail/Seomyeon").then(function (result) {
+//     console.log("통신 결과 : ", result);
+// }).catch(function (error) {
+//     console.log("에러 발생 : ", error);
+// });
+// console.log("바로 실행 로그");
+
+
+// 각 매점들 영어이름 XXXXX에 넣으면됨. 
+// axios.get("http://www.yes24.com/Mall/UsedStore/Detail/XXXXXXXX").then(function (result) {
 //     console.log("통신 결과 : ", result);
 // }).catch(function (error) {
 //     console.log("에러 발생 : ", error);
