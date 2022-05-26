@@ -128,10 +128,17 @@ async function getYes24Info(i, storeName){ // 재고를 제외하고 JSON명세�
 
 }
 
+
+// <span class="gd_name"> 제목
+// <span class="authPub info_auth"> 저자
+// <span class="authPub info_pub"> 출판사
+// <em class="yes_b"> 가격
+// <em class="txC_blue">를 찾아 매장 갯수를 알아놓는다.
+//info_row info_storeLoca를 찾는다. => <strong>찾는다. => 부산 서면점 =>  <span class="bit"> => 재고 갯수
 function getYes24Stock(isbn){
     axios.get("http://www.yes24.com/Product/Search?domain=STORE&query=" + isbn).then(function (result) {
         console.log("STOCK", result['data']);
-        console.log(isbn);
+
     }).catch(function (error) {
         console.log("에러 발생 : ", error);
     });
@@ -139,7 +146,7 @@ function getYes24Stock(isbn){
 
 }
 // var returnInfoData = [];
-async function getYes24Names(isbn){
+async function getYes24Names(isbnList){
     const returnValue = await axios.get("http://www.yes24.com/Mall/UsedStore/Detail/Seomyeon").then((result) => {
         var returnData = parserYes24Name(result['data']);
 
@@ -148,7 +155,11 @@ async function getYes24Names(isbn){
         }
 
         console.log("HIIIIIIIII", returnYes24Info)
-        var s = getYes24Stock(isbn);
+        
+        for(var i = 0; i<isbnList.length; i++){
+            getYes24Stock(isbnList[i]);
+        }
+
 
         return returnYes24Info
     }).catch(function (error) {
