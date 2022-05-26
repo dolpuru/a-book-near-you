@@ -19,9 +19,11 @@
 <script>
     // 검색시 시간초, 로딩을 걸고 비동기가 끝나기를 대략 기다린다?
     var yes24NameCode = ''
-    yes24NameCode = getYes24Names().then((result)=>{
-        return result;
-    });
+    // yes24NameCode = getYes24Names().then((result)=>{
+    //     return result;
+    // });
+
+    yes24NameCode = getYes24Names('9791167850690')
     console.log('hi', yes24NameCode);
     getYes24Info(yes24NameCode);
 </script>
