@@ -18,9 +18,10 @@
 </body>
 <script>
     var yes24NameCode = ''
-    
-    yes24NameCode = getYes24Names();
-    console.log(yes24NameCode);
+    yes24NameCode = getYes24Names().then((result)=>{
+        return result;
+    });
+    console.log('hi', yes24NameCode);
     getYes24Info(yes24NameCode);
 </script>
 

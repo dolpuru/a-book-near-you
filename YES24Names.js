@@ -46,14 +46,13 @@ function parserYes24Name(nameHtml) {
 }
 
 
-function asyncgetYes24Names() {
-    var returnValue = ''
-    axios.get("http://www.yes24.com/Mall/UsedStore/Detail/Seomyeon").then((result) => {
-        returnValue = parserYes24Name(result['data']);
-        // console.log(returnValue)
-        return returnValue
+async function getYes24Names(){
+    const returnValue = await axios.get("http://www.yes24.com/Mall/UsedStore/Detail/Seomyeon").then((result) => {
+        var returnData = parserYes24Name(result['data']);
+        console.log('returnData', returnData)
+        return returnData
     }).catch(function (error) {
         console.log("에러 발생 : ", error); // 에러처리 해주기
     });
     return returnValue
-}
+};
