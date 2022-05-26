@@ -6,8 +6,8 @@
     <script src="https://requirejs.org/docs/release/2.3.5/minified/require.js"></script>
 
 
-    <script src="./YES24Names.js"></script>
-    <script src="./YES24Info.js"></script>
+    <script src="./YES24.js"></script>
+
     <meta charset="UTF-8">
 
     <title>Document</title>
@@ -17,6 +17,7 @@
     hi
 </body>
 <script>
+    // 검색시 시간초, 로딩을 걸고 비동기가 끝나기를 대략 기다린다?
     var yes24NameCode = ''
     yes24NameCode = getYes24Names().then((result)=>{
         return result;
