@@ -1,8 +1,6 @@
 function parserYes24Name(nameHtml) {
     var flag = '<li><a href="/Mall/UsedStore/Detail/';
     var index = nameHtml.indexOf(flag, 0)
-    console.log(index);
-    console.log(flag.length);
     var codeNameList = new Array();
 
     while (index > 0) {
@@ -19,7 +17,6 @@ function parserYes24Name(nameHtml) {
                         continue;
                     }
                     appendPath += nameHtml[i];
-                    console.log(appendPath);
                 }
 
 
@@ -37,25 +34,24 @@ function parserYes24Name(nameHtml) {
 
             }
             codeNameList.push([appendPath, appendName.trimEnd()]);
-            console.log(appendName.split)
 
         }
 
         index = nameHtml.indexOf(flag, index + 1)
 
     }
-    console.log(codeNameList);
 
-
+    return codeNameList;
 
 }
 
 
-function getYes24Names() {
-    axios.get("http://www.yes24.com/Mall/UsedStore/Detail/Seomyeon").then(function (result) {
-        returnValue = result['data']
-        parserYes24Name(result['data'])
-        // console.log("통신 결과 : ", result['data']);
+function asyncgetYes24Names() {
+    var returnValue = ''
+    axios.get("http://www.yes24.com/Mall/UsedStore/Detail/Seomyeon").then((result) => {
+        returnValue = parserYes24Name(result['data']);
+        // console.log(returnValue)
+        return returnValue
     }).catch(function (error) {
         console.log("에러 발생 : ", error); // 에러처리 해주기
     });
