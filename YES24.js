@@ -97,59 +97,11 @@ function parserYes24Info(nameHtml) {
 }
 
 
-function parserYes24Stock(stockHtml) {
-    var flag = '<li><a href="/Mall/UsedStore/Detail/';
-    var index = nameHtml.indexOf(flag, 0)
-    var codeNameList = new Array();
-
-    while (index > 0) {
-        if (index > 0) {
-            var appendPath = '';
-            var checkAppendPath = true;
-            var appendName = '';
-            var checkAppendName = 0;
-
-            for (var i = index + flag.length; i < 10000000; i++) {
-                if (checkAppendPath == true) {
-                    if (nameHtml[i] == '"') {
-                        checkAppendPath = false;
-                        continue;
-                    }
-                    appendPath += nameHtml[i];
-                }
-
-
-                if (checkAppendName >= 2) {
-                    if (nameHtml[i] == "<") {
-                        break;
-                    } else {
-                        appendName += nameHtml[i];
-                    }
-                }
-
-                if (nameHtml[i] == '>') {
-                    checkAppendName += 1
-                }
-
-            }
-            codeNameList.push([appendPath, appendName.trimEnd()]);
-
-        }
-
-        index = nameHtml.indexOf(flag, index + 1)
-
-    }
-
-    return codeNameList;
-
-}
 
 
 var returnYes24Info = new Array();
-// http://www.yes24.com/Mall/UsedStore/Detail/Seomyeon
 async function getYes24Info(i, storeName){ // 재고를 제외하고 JSON명세에 맞춰서 return 해준다.
     var Yes24InfoJson = new Object();
-
 
 
         var url = "http://www.yes24.com/Mall/UsedStore/Detail/" + storeName[i][0];
@@ -173,9 +125,9 @@ async function getYes24Info(i, storeName){ // 재고를 제외하고 JSON명세�
         }).catch(function (error) {
             console.log("에러 발생 : ", error);
         });
-
-
 }
+
+
 
 
 // <span class="gd_name"> 제목
@@ -186,15 +138,154 @@ async function getYes24Info(i, storeName){ // 재고를 제외하고 JSON명세�
 //info_row info_storeLoca를 찾는다. => <strong>찾는다. => 부산 서면점 =>  <span class="bit"> => 재고 갯수
 // 이후 '부산 서면점', '서울 강서점'등의 결과가 나온다.
 // [{id:부산서면점, 제목: 제목, . . ..}, ] 을 돌면서 추가한다.
+function parserYes24Stock(stockHtml) {
+    var flag = '<span class="gd_name">'; // 제목
+    var flag2 = '<span class="authPub info_auth">'; // 저자
+    var flag3 = '<span class="authPub info_pub">'; // 출판사
+    var flag4 = '<em class="yes_b">'; // 가격
+    var flag5 = '<em class="txC_blue">';
+    var flag6 = '<strong>'; //지점
+    var flag7 = '<span class="bit">'; // 재고
+
+
+    var codeNameList = new Array();
+    var index = stockHtml.indexOf(flag, 0);
+
+    // 제목 parse
+    var gd_name = ''
+    for (var i = index + flag.length; i< 1000000; i++){
+        if (stockHtml[i] == '>'){
+            continue
+        }
+        else if (stockHtml[i] == '<'){
+            index = i
+            break
+        }
+        gd_name += stockHtml[i]
+    }
+
+
+    var info_auth = ''
+    var authPubFlag = false
+    index = stockHtml.indexOf(flag2, index);
+    for (var i = index + flag2.length+30; i< 1000000; i++){
+        if (stockHtml[i] == '>'){
+            authPubFlag = true
+            continue
+        }
+        if (stockHtml[i] == '<'){
+            index = i
+            break
+        }
+        if (authPubFlag==true){
+            info_auth += stockHtml[i]    
+        }
+        
+    }
+
+
+    var info_pub = ''
+    var info_pubFlag = false
+    index = stockHtml.indexOf(flag3, index);
+    for (var i = index + flag3.length+30; i< 1000000; i++){
+        if (stockHtml[i] == '>'){
+            info_pubFlag = true
+            continue
+        }
+        if (stockHtml[i] == '<'){
+            index = i
+            break
+        }
+        if ( info_pubFlag==true){
+            info_pub += stockHtml[i]    
+        }
+        
+    }
+
+    var price = ''
+    index = stockHtml.indexOf(flag4, index);
+    for (var i = index + flag4.length+1; i< 1000000; i++){
+        if (stockHtml[i] == '<'){
+            index = i
+            break
+        }
+        price += stockHtml[i]            
+    }
+
+
+    var storeCount = 0
+    index = stockHtml.indexOf(flag5, index);
+    for (var i = index + flag5.length; i< 1000000; i++){
+        if (stockHtml[i] == '<'){
+            index = i
+            break
+        }
+
+        storeCount += stockHtml[i]            
+    }
+    const regex = /[^0-9]/g;
+    var storeCountValue = storeCount.replace(regex, "");
+    var cnt = Number(storeCountValue)
+    console.log(Number(storeCountValue))
+
+    var flag6 = '<strong>'; //지점
+    var flag7 = '<span class="bit">'; // 재고
+    var storeStockList = new Array();
+    for (var i = 0; i<cnt; i++){
+   
+        console.log('iiiiiiiiii',i);
+        index = stockHtml.indexOf(flag6, index);
+        var tmp_value = ''
+        for (var j = index + flag6.length; j< 1000000; j++){
+            if (stockHtml[j] == '<'){
+                index = j
+                break
+            }
+            tmp_value += stockHtml[j]            
+        }
+
+        
+        index = stockHtml.indexOf(flag7, index);
+        var tmp_value2 = ''
+        for (var j = index + flag7.length; j< 1000000; j++){
+            if (stockHtml[j] == '<'){
+                index = j
+                break
+            }
+            tmp_value2 += stockHtml[j]            
+        }
+        
+        storeStockList.push([tmp_value, tmp_value2])
+
+    }
+
+    console.log('gd_name', gd_name);
+    console.log('info_auth', info_auth);
+    
+    console.log('info_pub', info_pub);
+    console.log('price', price);
+    console.log('storeCount', storeCountValue);
+    console.log('storeStockList', storeStockList);
+    
+    for (var i = 0; i< storeStockList.length; i++){
+        var appendObject = new Object();
+        // appendObject.
+    }
+    return codeNameList;
+
+}
+
+
+
+
 function getYes24Stock(isbn){
     axios.get("http://www.yes24.com/Product/Search?domain=STORE&query=" + isbn).then(function (result) {
         console.log("STOCK", result['data']);
-
+        parserYes24Stock(result['data']);
     }).catch(function (error) {
         console.log("에러 발생 : ", error);
     });
     
-
 }
 
 
@@ -203,15 +294,15 @@ function getYes24Stock(isbn){
 async function getYes24Names(isbnList){
     const returnValue = await axios.get("http://www.yes24.com/Mall/UsedStore/Detail/Seomyeon").then((result) => {
         var returnData = parserYes24Name(result['data']);
-
+        
         for(var i = 0; i<returnData.length; i++){
             getYes24Info(i, returnData);
         }
 
-        console.log("HIIIIIIIII", returnYes24Info)
+        // console.log("HIIIIIIIII", returnYes24Info)
         
         for(var i = 0; i<isbnList.length; i++){
-            getYes24Stock(isbnList[i]);
+             getYes24Stock(isbnList[i]);
         }
 
 
