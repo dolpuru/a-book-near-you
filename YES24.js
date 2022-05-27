@@ -98,29 +98,73 @@ function parserYes24Info(nameHtml) {
 
 
 
-
 var returnYes24Info = new Array();
-async function getYes24Info(i, storeName){ // 재고를 제외하고 JSON명세에 맞춰서 return 해준다.
+function getLatLon(searchKeyWord, data, test, url) {
     var Yes24InfoJson = new Object();
+    //document.write("<script src='https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=l7xx2c101ec10b184ce38225574befab7376'></script>");
+    //document.write("<script src='https://code.jquery.com/jquery-3.2.1.min.js'></script>");
+    if (searchKeyWord.length == 0) {
+        return NULL;
+    } else {
+        $.ajax({
+            method: "GET",
+            url: "https://apis.openapi.sk.com/tmap/pois?version=1&format=json&callback=result",
+            async: false,
+            data: {
+                "appKey": "l7xx2c101ec10b184ce38225574befab7376",
+                "searchKeyword": searchKeyWord,
+                "resCoordType": "EPSG3857",
+                "reqCoordType": "WGS84GEO",
+                "count": 10
+            },
+            success: function (response) {
+                var resultpoisData = response.searchPoiInfo.pois.poi;
+                var noorLat = Number(resultpoisData[0].noorLat);
+                var noorLon = Number(resultpoisData[0].noorLon);
+                var name = resultpoisData[0].name;
+
+                var pointCng = new Tmapv2.Point(noorLon, noorLat);
+                var projectionCng = new Tmapv2.Projection.convertEPSG3857ToWGS84GEO(
+                    pointCng);
+                var lat = projectionCng._lat;
+                var lon = projectionCng._lng;
+                console.log("lat: ", lat, " lon: ", lon);
+                Yes24InfoJson.lat = lat; // data[0] 을 좌표로 변환하는 함수 필요 
+                Yes24InfoJson.lon = lon;
+                Yes24InfoJson.storeName = test
+                Yes24InfoJson.closeDay = data[3];
+                Yes24InfoJson.opertingTime = data[2];
+                Yes24InfoJson.telNum = data[1];
+                Yes24InfoJson.url = url;
+                Yes24InfoJson.searchResult = [];
+                console.log("통신 결과 : ", Yes24InfoJson);
+                // return Yes24InfoJson;
+                returnYes24Info.push(Yes24InfoJson);
+
+                // return [lat, lon];
+            },
+            error: function (request, status, error) {
+                console.log("code:" + request.status + "\n" + "message:" + request
+                    .responseText + "\n" + "error:" + error);
+            }
+        });
+    }
+}
 
 
+
+async function getYes24Info(i, storeName){ // 재고를 제외하고 JSON명세에 맞춰서 return 해준다.
+    
         var url = "http://www.yes24.com/Mall/UsedStore/Detail/" + storeName[i][0];
         var test = storeName[i][1];
         
         await axios.get(url).then(function (result) { // 결과 발생시에만 push
-            var data = parserYes24Info(result['data'])
-            Yes24InfoJson.lat = '1'; // data[0] 을 좌표로 변환하는 함수 필요 
-            Yes24InfoJson.lon = '1';
+            var data = parserYes24Info(result['data']);
+            getLatLon('Yes24 ' + test, data, test, url);
+            
+            
             // console.log(storeName[i][1]);
-            Yes24InfoJson.storeName = test
-            Yes24InfoJson.closeDay = data[3];
-            Yes24InfoJson.opertingTime = data[2];
-            Yes24InfoJson.telNum = data[1];
-            Yes24InfoJson.url = url;
-            Yes24InfoJson.searchResult = [];
-            console.log("통신 결과 : ", Yes24InfoJson);
-            // return Yes24InfoJson;
-            returnYes24Info.push(Yes24InfoJson);
+        
             
         }).catch(function (error) {
             console.log("에러 발생 : ", error);
@@ -267,11 +311,27 @@ function parserYes24Stock(stockHtml) {
     console.log('storeCount', storeCountValue);
     console.log('storeStockList', storeStockList);
     
+    console.log('returnYes24Info', returnYes24Info)
+
+    var appendObject = new Object();
+        appendObject.title = gd_name
+        appendObject.price = price
+        appendObject.author = info_auth;
+        appendObject.publisher = info_pub;
+        
     for (var i = 0; i< storeStockList.length; i++){
-        var appendObject = new Object();
-        // appendObject.
+        
+        for (var j =0; j< returnYes24Info.length; j++){
+            if (returnYes24Info[j]['storeName'] == storeStockList[i][0]){
+                appendObject.stock = storeStockList[i][1]
+                returnYes24Info[j]['searchResult'].push(appendObject)
+                break;
+            }
+        }
     }
-    return codeNameList;
+
+    console.log('answer!!!', returnYes24Info)
+    return returnYes24Info;
 
 }
 
@@ -280,7 +340,7 @@ function parserYes24Stock(stockHtml) {
 
 function getYes24Stock(isbn){
     axios.get("http://www.yes24.com/Product/Search?domain=STORE&query=" + isbn).then(function (result) {
-        console.log("STOCK", result['data']);
+        // console.log("STOCK", result['data']);
         parserYes24Stock(result['data']);
     }).catch(function (error) {
         console.log("에러 발생 : ", error);
@@ -288,6 +348,8 @@ function getYes24Stock(isbn){
     
 }
 
+//<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+//<script src="https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=l7xx2c101ec10b184ce38225574befab7376"></script>
 
 
 // var returnInfoData = [];
@@ -299,22 +361,16 @@ async function getYes24Names(isbnList){
             getYes24Info(i, returnData);
         }
 
-        // console.log("HIIIIIIIII", returnYes24Info)
         
         for(var i = 0; i<isbnList.length; i++){
              getYes24Stock(isbnList[i]);
         }
-
+        
+        console.log('lastanswer', returnYes24Info)
 
         return returnYes24Info
     }).catch(function (error) {
         console.log("에러 발생 : ", error); // 에러처리 해주기
     });
-    return returnValue
+  
 };
-
-
-
-// function startYes24('9791167850690'){
-//     getYes24Names()
-// }
