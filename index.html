@@ -1,28 +1,103 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="https://requirejs.org/docs/release/2.3.5/minified/require.js"></script>
-    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-    <script src="https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=l7xx2c101ec10b184ce38225574befab7376"></script>
-    
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport"
+		content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
+	<title>simpleMap</title>
+	<link rel="stylesheet" href="./css/index.css">
+	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+	<script src="https://requirejs.org/docs/release/2.3.5/minified/require.js"></script>
+	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+	<script src="https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=l7xx2c101ec10b184ce38225574befab7376"></script>
 
-    <!-- <script src="./YES24.js"></script> -->
-    <script src="./Gyobo.js"></script>
-    <meta charset="UTF-8">
 
-    <title>Document</title>
-</head>
+	<script src="./js/YES24.js"></script>
+	<script src="./js/YP.js"></script>
+	<script src="./js/GYOBO.js"></script>
+	<script src="./js/MAP.js"></script>
 
-<body>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"
+		integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g=="
+		crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap" rel="stylesheet">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&family=Noto+Sans+KR&display=swap"
+		rel="stylesheet">
 
+<body onload="initTmap();">
+	<div class="layout">
+		<div id="sideBar">
+			<!-- 제목 및 검색바 -->
+			<header>
+				<div class="teamName">Mains</div>
+				<div class="searchBarBox">
+					<input class="bookSearchBar"></input>
+					<button class="iconCircle">
+						<i class="fa-solid fa-magnifying-glass"></i> <!-- 검색 아이콘 -->
+					</button>
+				</div>
+
+			</header>
+
+			<!-- 길찾기 -->
+			<nav class="getDirections">
+
+				<div class="depart">
+					<img src="./images/depart.png"> <!-- 출발 아이콘 -->
+					<input class="searchDepartBar"></input>
+					<button class="orderSwitchingIcon">
+						<i class="fa-solid fa-repeat"></i><!-- 스위치 아이콘 -->
+					</button>
+				</div>
+
+				<div class="arrive">
+					<img src="./images/arrive.png"> <!-- 도착 아이콘 -->
+					<input class="searchArriveBar"></input>
+					<button class="closeIcon">
+						<i class="fa-solid fa-xmark"></i> <!-- 닫기(X) 아이콘 -->
+					</button>
+				</div>
+
+			</nav>
+
+			<div class="searchSetting">
+
+				<div class="controllerName">검색 반경설정</div>
+				<div class="radiusController">
+					<div>0km</div>
+					<input type="range" class="customizing">
+					<div>10km</div>
+				</div>
+
+			</div>
+
+			<!-- 도서 제공처 -->
+			<section class="bookSection">
+
+				<div class="bookSectionHeaderName">내 주변 도서 제공처</div>
+				<div class="bookSectionSources">
+					<div class="bookSectionSource1">ex1</div>
+					<div class="bookSectionSource2">ex2</div>
+					<div class="bookSectionSource3">ex3</div>
+				</div>
+
+			</section>
+		</div>
+		<button id="sideBarToggle" onclick="toggleBar('sideBar', 'sideBarToggle', 'sideBarToggleTwo');">
+			<i class="fa-solid fa-angle-left"></i>
+		</button>
+
+		<button id="sideBarToggleTwo" onclick="toggleBar('sideBar', 'sideBarToggle', 'sideBarToggleTwo');">
+			<i class="fa-solid fa-angle-right"></i>
+		</button>
+
+		<div id="map_div" class="map_wrap"></div>
+	</div>
 </body>
-<script>
-    // 검색시 시간초, 로딩을 걸고 비동기가 끝나기를 대략 기다린다?
-    // var yes24Json = getYes24Names(['9788968481475'])
-    // console.log("TESTSETSETSETSET", yes24Json)
-    var gyoboJson =  getGyoboNames(['9791162243077']);
-</script>
 
 </html>

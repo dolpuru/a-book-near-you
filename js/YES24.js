@@ -51,10 +51,10 @@ function parserYes24Info(nameHtml) {
     var index = nameHtml.indexOf(flagLocal, 0)
     var tmpValue = ''
     for (var i = index + flagLocal.length; i < 10000000; i++) {
-            if (nameHtml[i] == '<') {
-                break;
-            }
-            tmpValue += nameHtml[i];
+        if (nameHtml[i] == '<') {
+            break;
+        }
+        tmpValue += nameHtml[i];
     }
     Yes24InfoList.push(tmpValue);
 
@@ -63,10 +63,10 @@ function parserYes24Info(nameHtml) {
     var index = nameHtml.indexOf(flagNumber, 0)
     var tmpValue = ''
     for (var i = index + flagLocal.length; i < 10000000; i++) {
-            if (nameHtml[i] == '<') {
-                break;
-            }
-            tmpValue += nameHtml[i];
+        if (nameHtml[i] == '<') {
+            break;
+        }
+        tmpValue += nameHtml[i];
     }
     Yes24InfoList.push(tmpValue);
 
@@ -78,15 +78,14 @@ function parserYes24Info(nameHtml) {
     for (var i = index + flagTime.length; i < 10000000; i++) {
         if (nameHtml[i] == '<') {
             break;
-        }    
-        if (nameHtml[i] == '/'){
-                flagIndex = false;
-                continue
-            }    
-        if (flagIndex==true){
-                tmpValue1 += nameHtml[i]
-            }
-        else if (flagIndex==false){
+        }
+        if (nameHtml[i] == '/') {
+            flagIndex = false;
+            continue
+        }
+        if (flagIndex == true) {
+            tmpValue1 += nameHtml[i]
+        } else if (flagIndex == false) {
             tmpValue2 += nameHtml[i];
         }
     }
@@ -97,9 +96,7 @@ function parserYes24Info(nameHtml) {
 }
 
 
-
-var returnYes24Info = new Array();
-function getLatLon(searchKeyWord, data, test, url) {
+function getLatLon(searchKeyWord, data, test, url, pushObject) {
     var Yes24InfoJson = new Object();
     //document.write("<script src='https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=l7xx2c101ec10b184ce38225574befab7376'></script>");
     //document.write("<script src='https://code.jquery.com/jquery-3.2.1.min.js'></script>");
@@ -128,8 +125,7 @@ function getLatLon(searchKeyWord, data, test, url) {
                     pointCng);
                 var lat = projectionCng._lat;
                 var lon = projectionCng._lng;
-                // console.log("lat: ", lat, " lon: ", lon);
-                Yes24InfoJson.lat = lat; // data[0] 을 좌표로 변환하는 함수 필요 
+                Yes24InfoJson.lat = lat; // data[0] 을 좌표로 변환하는 함수 필요
                 Yes24InfoJson.lon = lon;
                 Yes24InfoJson.storeName = test
                 Yes24InfoJson.closeDay = data[3];
@@ -137,14 +133,14 @@ function getLatLon(searchKeyWord, data, test, url) {
                 Yes24InfoJson.telNum = data[1];
                 Yes24InfoJson.url = url;
                 Yes24InfoJson.searchResult = [];
-                // console.log("통신 결과 : ", Yes24InfoJson);
                 // return Yes24InfoJson;
-                returnYes24Info.push(Yes24InfoJson);
+                pushObject(Yes24InfoJson)
+                //returnYes24Info.push(Yes24InfoJson);
 
                 // return [lat, lon];
             },
             error: function (request, status, error) {
-                console.log("code:" + request.status + "\n" + "message:" + request
+                console.error("code:" + request.status + "\n" + "message:" + request
                     .responseText + "\n" + "error:" + error);
             }
         });
@@ -153,22 +149,18 @@ function getLatLon(searchKeyWord, data, test, url) {
 
 
 
-async function getYes24Info(i, storeName){ // 재고를 제외하고 JSON명세에 맞춰서 return 해준다.
-    
-        var url = "http://www.yes24.com/Mall/UsedStore/Detail/" + storeName[i][0];
-        var test = storeName[i][1];
-        
-        await axios.get(url).then(function (result) { // 결과 발생시에만 push
-            var data = parserYes24Info(result['data']);
-            getLatLon('Yes24 ' + test, data, test, url);
-            
-            
-            // console.log(storeName[i][1]);
-        
-            
-        }).catch(function (error) {
-            console.log("에러 발생 : ", error);
-        });
+async function getYes24Info(i, storeName, pushObject) { // 재고를 제외하고 JSON명세에 맞춰서 return 해준다.
+
+    var url = "http://www.yes24.com/Mall/UsedStore/Detail/" + storeName[i][0];
+    var test = storeName[i][1];
+
+    await axios.get(url).then(function (result) { // 결과 발생시에만 push
+        var data = parserYes24Info(result['data']);
+        return getLatLon('Yes24 ' + test, data, test, url, pushObject);
+
+    }).catch(function (error) {
+        console.error("에러 발생 : ", error);
+    });
 }
 
 
@@ -182,7 +174,7 @@ async function getYes24Info(i, storeName){ // 재고를 제외하고 JSON명세�
 //info_row info_storeLoca를 찾는다. => <strong>찾는다. => 부산 서면점 =>  <span class="bit"> => 재고 갯수
 // 이후 '부산 서면점', '서울 강서점'등의 결과가 나온다.
 // [{id:부산서면점, 제목: 제목, . . ..}, ] 을 돌면서 추가한다.
-function parserYes24Stock(stockHtml) {
+function parserYes24Stock(stockHtml, updateObject) {
     var flag = '<span class="gd_name">'; // 제목
     var flag2 = '<span class="authPub info_auth">'; // 저자
     var flag3 = '<span class="authPub info_pub">'; // 출판사
@@ -197,11 +189,10 @@ function parserYes24Stock(stockHtml) {
 
     // 제목 parse
     var gd_name = ''
-    for (var i = index + flag.length; i< 1000000; i++){
-        if (stockHtml[i] == '>'){
+    for (var i = index + flag.length; i < 1000000; i++) {
+        if (stockHtml[i] == '>') {
             continue
-        }
-        else if (stockHtml[i] == '<'){
+        } else if (stockHtml[i] == '<') {
             index = i
             break
         }
@@ -212,168 +203,163 @@ function parserYes24Stock(stockHtml) {
     var info_auth = ''
     var authPubFlag = false
     index = stockHtml.indexOf(flag2, index);
-    for (var i = index + flag2.length+30; i< 1000000; i++){
-        if (stockHtml[i] == '>'){
+    for (var i = index + flag2.length + 30; i < 1000000; i++) {
+        if (stockHtml[i] == '>') {
             authPubFlag = true
             continue
         }
-        if (stockHtml[i] == '<'){
+        if (stockHtml[i] == '<') {
             index = i
             break
         }
-        if (authPubFlag==true){
-            info_auth += stockHtml[i]    
+        if (authPubFlag == true) {
+            info_auth += stockHtml[i]
         }
-        
+
     }
 
 
     var info_pub = ''
     var info_pubFlag = false
     index = stockHtml.indexOf(flag3, index);
-    for (var i = index + flag3.length+30; i< 1000000; i++){
-        if (stockHtml[i] == '>'){
+    for (var i = index + flag3.length + 30; i < 1000000; i++) {
+        if (stockHtml[i] == '>') {
             info_pubFlag = true
             continue
         }
-        if (stockHtml[i] == '<'){
+        if (stockHtml[i] == '<') {
             index = i
             break
         }
-        if ( info_pubFlag==true){
-            info_pub += stockHtml[i]    
+        if (info_pubFlag == true) {
+            info_pub += stockHtml[i]
         }
-        
+
     }
 
     var price = ''
     index = stockHtml.indexOf(flag4, index);
-    for (var i = index + flag4.length+1; i< 1000000; i++){
-        if (stockHtml[i] == '<'){
+    for (var i = index + flag4.length + 1; i < 1000000; i++) {
+        if (stockHtml[i] == '<') {
             index = i
             break
         }
-        price += stockHtml[i]            
+        price += stockHtml[i]
     }
 
 
     var storeCount = 0
     index = stockHtml.indexOf(flag5, index);
-    for (var i = index + flag5.length; i< 1000000; i++){
-        if (stockHtml[i] == '<'){
+    for (var i = index + flag5.length; i < 1000000; i++) {
+        if (stockHtml[i] == '<') {
             index = i
             break
         }
 
-        storeCount += stockHtml[i]            
+        storeCount += stockHtml[i]
     }
     const regex = /[^0-9]/g;
     var storeCountValue = storeCount.replace(regex, "");
     var cnt = Number(storeCountValue)
-    // console.log(Number(storeCountValue))
 
     var flag6 = '<strong>'; //지점
     var flag7 = '<span class="bit">'; // 재고
     var storeStockList = new Array();
-    for (var i = 0; i<cnt; i++){
+    for (var i = 0; i < cnt; i++) {
 
         index = stockHtml.indexOf(flag6, index);
         var tmp_value = ''
-        for (var j = index + flag6.length; j< 1000000; j++){
-            if (stockHtml[j] == '<'){
+        for (var j = index + flag6.length; j < 1000000; j++) {
+            if (stockHtml[j] == '<') {
                 index = j
                 break
             }
-            tmp_value += stockHtml[j]            
+            tmp_value += stockHtml[j]
         }
 
-        
+
         index = stockHtml.indexOf(flag7, index);
         var tmp_value2 = ''
-        for (var j = index + flag7.length; j< 1000000; j++){
-            if (stockHtml[j] == '<'){
+        for (var j = index + flag7.length; j < 1000000; j++) {
+            if (stockHtml[j] == '<') {
                 index = j
                 break
             }
-            tmp_value2 += stockHtml[j]            
+            tmp_value2 += stockHtml[j]
         }
-        
+
         storeStockList.push([tmp_value, tmp_value2])
 
     }
 
-    // console.log('gd_name', gd_name);
-    // console.log('info_auth', info_auth);
-    
-    // console.log('info_pub', info_pub);
-    // console.log('price', price);
-    // console.log('storeCount', storeCountValue);
-    // console.log('storeStockList', storeStockList);
-    
-    // console.log('returnYes24Info', returnYes24Info)
-
     var appendObject = new Object();
-        appendObject.title = gd_name
-        appendObject.price = price
-        appendObject.author = info_auth;
-        appendObject.publisher = info_pub;
-        
-    for (var i = 0; i< storeStockList.length; i++){
-        
-        for (var j =0; j< returnYes24Info.length; j++){
-            if (returnYes24Info[j]['storeName'] == storeStockList[i][0]){
-                appendObject.stock = storeStockList[i][1]
-                returnYes24Info[j]['searchResult'].push(appendObject)
-                break;
-            }
-        }
-    }
+    appendObject.title = gd_name
+    appendObject.price = price
+    appendObject.author = info_auth;
+    appendObject.publisher = info_pub;
 
-    // console.log('answer!!!', returnYes24Info)
-    return returnYes24Info;
+    for (var i = 0; i < storeStockList.length; i++)
+        updateObject(appendObject, storeStockList[i])
+
+
 
 }
 
-
-
-
-function getYes24Stock(isbn){
-    axios.get("http://www.yes24.com/Product/Search?domain=STORE&query=" + isbn).then(function (result) {
-        // console.log("STOCK", result['data']);
-        parserYes24Stock(result['data']);
+async function getYes24Stock(isbn, updateObject) {
+    await axios.get("http://www.yes24.com/Product/Search?domain=STORE&query=" + isbn).then(function (result) {
+        parserYes24Stock(result['data'], updateObject);
     }).catch(function (error) {
-        console.log("에러 발생 : ", error);
+        console.error("에러 발생 : ", error);
     });
-    
+
 }
 
 //<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 //<script src="https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=l7xx2c101ec10b184ce38225574befab7376"></script>
 
+async function getYes24Names(isbnList, tempFunction) {
 
-// var returnInfoData = [];
-async function getYes24Names(isbnList){
-    const returnValue = await axios.get("http://www.yes24.com/Mall/UsedStore/Detail/Seomyeon").then((result) => {
-        var returnData = parserYes24Name(result['data']);
-        
-        for(var i = 0; i<returnData.length; i++){
-            getYes24Info(i, returnData);
+    return await axios.get("http://www.yes24.com/Mall/UsedStore/Detail/Seomyeon").then((result) => {
+        const returnData = parserYes24Name(result['data']);
+        return returnData
+    }).then(async (returnData) => {
+        const resultData = []
+        const pushObject = (v) => {
+            resultData.push(v);
         }
-
-        
-        for(var i = 0; i<isbnList.length; i++){
-             getYes24Stock(isbnList[i]);
+        let data
+        for (var i = 0; i < returnData.length; i++) {
+            data = await getYes24Info(i, returnData, pushObject);
         }
-        
-        console.log('lastanswer', returnYes24Info)
-        // 여기에 넣으면ㄷ ㅚㅁ 
-// 여기에 넣으면ㄷ ㅚㅁ 
-// 여기에 넣으면ㄷ ㅚㅁ 
-// 여기에 넣으면ㄷ ㅚㅁ 
+        return resultData
+    }).then(async (resultData) => {
+        const updateObject = (appendObject, storeStock) => {
+            for (var j = 0; j < resultData.length; j++) {
+                if (resultData[j]['storeName'] == storeStock[0]) {
+                    appendObject.stock = storeStock[1]
+                    resultData[j]['searchResult'].push(appendObject)
+                    break;
+                }
+            }
+        }
+        for (var i = 0; i < isbnList.length; i++) {
+            await getYes24Stock(isbnList[i], updateObject);
+        }
+        return resultData
+    }).then((result) => {
+        tempFunction(result, 'Yes24', './images/yes24.png');
+        return result
 
-        return returnYes24Info
     }).catch(function (error) {
-        console.log("에러 발생 : ", error); // 에러처리 해주기
+        console.error("에러 발생 : ", error); // 에러처리 해주기
     });
-  
+
+
 };
+
+async function getNames() {
+    return await axios.get("http://www.yes24.com/Mall/UsedStore/Detail/Seomyeon").then((result) => {
+        const returnData = parserYes24Name(result['data']);
+        return returnData
+    })
+}
