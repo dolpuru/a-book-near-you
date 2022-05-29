@@ -128,7 +128,7 @@ function getLatLon(searchKeyWord, data, test, url) {
                     pointCng);
                 var lat = projectionCng._lat;
                 var lon = projectionCng._lng;
-                console.log("lat: ", lat, " lon: ", lon);
+                // console.log("lat: ", lat, " lon: ", lon);
                 Yes24InfoJson.lat = lat; // data[0] 을 좌표로 변환하는 함수 필요 
                 Yes24InfoJson.lon = lon;
                 Yes24InfoJson.storeName = test
@@ -137,7 +137,7 @@ function getLatLon(searchKeyWord, data, test, url) {
                 Yes24InfoJson.telNum = data[1];
                 Yes24InfoJson.url = url;
                 Yes24InfoJson.searchResult = [];
-                console.log("통신 결과 : ", Yes24InfoJson);
+                // console.log("통신 결과 : ", Yes24InfoJson);
                 // return Yes24InfoJson;
                 returnYes24Info.push(Yes24InfoJson);
 
@@ -270,14 +270,13 @@ function parserYes24Stock(stockHtml) {
     const regex = /[^0-9]/g;
     var storeCountValue = storeCount.replace(regex, "");
     var cnt = Number(storeCountValue)
-    console.log(Number(storeCountValue))
+    // console.log(Number(storeCountValue))
 
     var flag6 = '<strong>'; //지점
     var flag7 = '<span class="bit">'; // 재고
     var storeStockList = new Array();
     for (var i = 0; i<cnt; i++){
-   
-        console.log('iiiiiiiiii',i);
+
         index = stockHtml.indexOf(flag6, index);
         var tmp_value = ''
         for (var j = index + flag6.length; j< 1000000; j++){
@@ -303,15 +302,15 @@ function parserYes24Stock(stockHtml) {
 
     }
 
-    console.log('gd_name', gd_name);
-    console.log('info_auth', info_auth);
+    // console.log('gd_name', gd_name);
+    // console.log('info_auth', info_auth);
     
-    console.log('info_pub', info_pub);
-    console.log('price', price);
-    console.log('storeCount', storeCountValue);
-    console.log('storeStockList', storeStockList);
+    // console.log('info_pub', info_pub);
+    // console.log('price', price);
+    // console.log('storeCount', storeCountValue);
+    // console.log('storeStockList', storeStockList);
     
-    console.log('returnYes24Info', returnYes24Info)
+    // console.log('returnYes24Info', returnYes24Info)
 
     var appendObject = new Object();
         appendObject.title = gd_name
@@ -330,7 +329,7 @@ function parserYes24Stock(stockHtml) {
         }
     }
 
-    console.log('answer!!!', returnYes24Info)
+    // console.log('answer!!!', returnYes24Info)
     return returnYes24Info;
 
 }
@@ -367,6 +366,10 @@ async function getYes24Names(isbnList){
         }
         
         console.log('lastanswer', returnYes24Info)
+        // 여기에 넣으면ㄷ ㅚㅁ 
+// 여기에 넣으면ㄷ ㅚㅁ 
+// 여기에 넣으면ㄷ ㅚㅁ 
+// 여기에 넣으면ㄷ ㅚㅁ 
 
         return returnYes24Info
     }).catch(function (error) {
