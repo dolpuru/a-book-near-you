@@ -12,7 +12,7 @@ async function initTmap() {
         const test = [
             [data, name, img]
         ]
-        // test = [
+        // test = [ 
         //     [returnYes24Info, 'yes24', './yes24.png'],
         //     [returnGyoboInfo, 'gyobo', './kyobo.png'],
         //     [returnYPInfo, 'YP', './example.png']
@@ -99,7 +99,7 @@ async function initTmap() {
                 marker[j] = new Tmapv2.Marker({
                     position: new Tmapv2.LatLng(test[i][0][j]["lat"], test[i][0][j]["lon"]),
                     map: map,
-                    icon: "./ballon.png",
+                    icon: "./images./ballon.png",
                     zIndex: 0
                 });
 
@@ -113,7 +113,7 @@ async function initTmap() {
     }
 
     // 이것이 자바다
-    getYes24Names(['9788968481475'], makerFunction)
+    getYes24Names(['9788968481475', '9788968481123'], makerFunction)
     getGyobo(['9788968481475'], makerFunction)
     getYPbooks(makerFunction)
 }
