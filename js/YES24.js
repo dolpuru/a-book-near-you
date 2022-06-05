@@ -1,5 +1,5 @@
 // Yes24 지점명에 대한 위치 확인
-function getYes24LatLon(searchKeyWord, data, test, url, userLocation, searchRange, pushObject) {
+function getYes24LatLon(searchKeyWord, data, storeName, url, userLocation, searchRange, pushObject) {
     var Yes24InfoJson = new Object();
 
 
@@ -50,7 +50,7 @@ function getYes24LatLon(searchKeyWord, data, test, url, userLocation, searchRang
                 // 35.155489508012636/*usrLocation[0]*/, 129.05959731396132/*usrLocation[1]*/
                 // 근처의 도서만 Object를 만듭니다.
                 if (getDistanceFromLatLonInKm(lat, lon, 35.155489508012636, 129.05959731396132) <= searchRange) {
-                    Yes24InfoJson.storeName = test
+                    Yes24InfoJson.storeName = storeName
                     Yes24InfoJson.closedDay = data[3];
                     Yes24InfoJson.operatingTime = data[2];
                     Yes24InfoJson.telNum = data[1];
@@ -121,10 +121,10 @@ function parserYes24Info(nameHtml) {
 };
 
 // Yes24 정보 확인 
-async function getYes24Info(i, storeName, userLocation, searchRange, pushObject) {
+async function getYes24Info(index, storeName, userLocation, searchRange, pushObject) {
 
-    var url = "http://www.yes24.com/Mall/UsedStore/Detail/" + storeName[i][0];
-    var sotreName = storeName[i][1];
+    var url = "http://www.yes24.com/Mall/UsedStore/Detail/" + storeName[index][0];
+    var sotreName = storeName[index][1];
 
     await axios.get(url).then(function (result) { // 결과 발생시에만 push
         var data = parserYes24Info(result['data']);

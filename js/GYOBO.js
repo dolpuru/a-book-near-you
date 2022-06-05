@@ -137,7 +137,7 @@ async function getGyoboInfo(siteCode, useLocation, searchRange, pushObject) {
 }
 
 // 교보문고 재고결과 파서
-function parserGyoboStock(siteIndex, stockHtml, pushObject2) {
+function parserGyoboStock(siteIndex, stockHtml, pushObject) {
 	//<span class="author"> => 저자
 	// <span class="company"> => 출판사
 	// <span class="stock"> => <strong> =>  재고
@@ -209,7 +209,7 @@ function parserGyoboStock(siteIndex, stockHtml, pushObject2) {
 	GyoboStockJson.price = gyoboPrice
 	GyoboStockJson.publisher = gyoboCompany
 	GyoboStockJson.stock = gyoboStock
-	pushObject2(siteIndex, GyoboStockJson);
+	pushObject(siteIndex, GyoboStockJson);
 
 }
 
