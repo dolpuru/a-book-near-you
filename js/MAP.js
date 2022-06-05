@@ -314,13 +314,14 @@ async function initTmap(IsbnLists, searchRange) {
         }
     }
 
+
     // 이것이 자바다
-    getYes24Names(['9788968481475', '9788968481123'], 0, searchRange ,makerFunction)
-    aladinStart(['9788968481024', '9788968481475', '9791162243770', '9791162243077', '9791162242780'],0,searchRange,makerFunction);
-    startIndependentStore(0,0,searchRange,makerFunction);
+    startYes24(['9788968481475', '9788968481123'], 0, searchRange ,makerFunction)
+    // aladinStart(['9788968481024', '9788968481475', '9791162243770', '9791162243077', '9791162242780'],0,searchRange,makerFunction);
+    // startIndependentStore(0,0,searchRange,makerFunction);
     // pubLibStart(['9788968481024', '9788968481475', '9791162243770', '9791162243077', '9791162242780','9788968481123'],0,99999999,makerFunction);
-    getGyobo(['9788968481475', '9788968481123', '9788968481123'], 0, searchRange, makerFunction)
-    getYPbooks(0, searchRange, makerFunction)
+    // getGyobo(['9788968481475', '9788968481123', '9788968481123'], 0, searchRange, makerFunction)
+    // getYPbooks(0, searchRange, makerFunction)
     console.log("isbnlist", IsbnLists);
     console.log("range", searchRange);
 }
