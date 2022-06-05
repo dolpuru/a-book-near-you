@@ -49,7 +49,7 @@ function getYes24LatLon(searchKeyWord, data, storeName, url, userLocation, searc
 
                 // 35.155489508012636/*usrLocation[0]*/, 129.05959731396132/*usrLocation[1]*/
                 // 근처의 도서만 Object를 만듭니다.
-                if (getDistanceFromLatLonInKm(lat, lon, 35.155489508012636, 129.05959731396132) <= searchRange) {
+                if (getDistanceFromLatLonInKm(lat, lon, usrLocation[0], usrLocation[1]) <= searchRange) {
                     Yes24InfoJson.storeName = storeName
                     Yes24InfoJson.closedDay = data[3];
                     Yes24InfoJson.operatingTime = data[2];
@@ -71,11 +71,12 @@ function getYes24LatLon(searchKeyWord, data, storeName, url, userLocation, searc
 
 // Yes24 정보 결과 파서
 function parserYes24Info(nameHtml) {
+    INF = 10000000
     var Yes24InfoList = new Array();
     var flagLocal = '주소 : ';
     var index = nameHtml.indexOf(flagLocal, 0)
     var tmpValue = ''
-    for (var i = index + flagLocal.length; i < 10000000; i++) {
+    for (var i = index + flagLocal.length; i < INF; i++) {
         if (nameHtml[i] == '<') {
             break;
         }
@@ -87,7 +88,7 @@ function parserYes24Info(nameHtml) {
     var flagNumber = '연락처 : ';
     var index = nameHtml.indexOf(flagNumber, 0)
     var tmpValue = ''
-    for (var i = index + flagLocal.length; i < 10000000; i++) {
+    for (var i = index + flagLocal.length; i < INF; i++) {
         if (nameHtml[i] == '<') {
             break;
         }
@@ -100,7 +101,7 @@ function parserYes24Info(nameHtml) {
     var tmpValue1 = ''
     var tmpValue2 = ''
     var flagIndex = true
-    for (var i = index + flagTime.length; i < 10000000; i++) {
+    for (var i = index + flagTime.length; i < INF; i++) {
         if (nameHtml[i] == '<') {
             break;
         }
