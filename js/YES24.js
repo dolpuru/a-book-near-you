@@ -96,7 +96,7 @@ function parserYes24Info(nameHtml) {
 }
 
 
-function getLatLon(searchKeyWord, data, test, url, pushObject) {
+function getLatLon(searchKeyWord, data, test, url,useLocation, searchRange, pushObject) {
     var Yes24InfoJson = new Object();
     //document.write("<script src='https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=l7xx2c101ec10b184ce38225574befab7376'></script>");
     //document.write("<script src='https://code.jquery.com/jquery-3.2.1.min.js'></script>");
@@ -127,7 +127,26 @@ function getLatLon(searchKeyWord, data, test, url, pushObject) {
                 var lon = projectionCng._lng;
                 Yes24InfoJson.lat = lat; // data[0] 을 좌표로 변환하는 함수 필요
                 Yes24InfoJson.lon = lon;
-                Yes24InfoJson.storeName = test
+                
+                function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+                    function deg2rad(deg) {
+                        return deg * (Math.PI / 180)
+                    }
+                    var R = 6371; // Radius of the earth in km
+                    var dLat = deg2rad(lat2 - lat1); // deg2rad below
+                    var dLon = deg2rad(lon2 - lon1);
+                    var a =
+                        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2)
+                        ;
+                    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                    var d = R * c; // Distance in km
+                    return d;
+                }
+                // 35.155489508012636/*usrLocation[0]*/, 129.05959731396132/*usrLocation[1]*/
+                if (getDistanceFromLatLonInKm(lat,lon, 35.155489508012636,129.05959731396132) <= searchRange){
+                    Yes24InfoJson.storeName = test
                 Yes24InfoJson.closedDay = data[3];
                 Yes24InfoJson.opertingTime = data[2];
                 Yes24InfoJson.telNum = data[1];
@@ -135,9 +154,9 @@ function getLatLon(searchKeyWord, data, test, url, pushObject) {
                 Yes24InfoJson.searchResult = [];
                 // return Yes24InfoJson;
                 pushObject(Yes24InfoJson)
-                //returnYes24Info.push(Yes24InfoJson);
+                }
+                
 
-                // return [lat, lon];
             },
             error: function (request, status, error) {
                 console.error("code:" + request.status + "\n" + "message:" + request
@@ -149,14 +168,14 @@ function getLatLon(searchKeyWord, data, test, url, pushObject) {
 
 
 
-async function getYes24Info(i, storeName, pushObject) { // 재고를 제외하고 JSON명세에 맞춰서 return 해준다.
+async function getYes24Info(i, storeName, useLocation, searchRange, pushObject) { // 재고를 제외하고 JSON명세에 맞춰서 return 해준다.
 
     var url = "http://www.yes24.com/Mall/UsedStore/Detail/" + storeName[i][0];
     var test = storeName[i][1];
 
     await axios.get(url).then(function (result) { // 결과 발생시에만 push
         var data = parserYes24Info(result['data']);
-        return getLatLon('Yes24 ' + test, data, test, url, pushObject);
+        return getLatLon('Yes24 ' + test, data, test, url,useLocation, searchRange, pushObject);
 
     }).catch(function (error) {
         console.error("에러 발생 : ", error);
@@ -317,10 +336,11 @@ async function getYes24Stock(isbn, updateObject) {
 //<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 //<script src="https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=l7xx2c101ec10b184ce38225574befab7376"></script>
 
-async function getYes24Names(isbnList, tempFunction) {
+async function getYes24Names(isbnList, useLocation, searchRange, tempFunction) {
 
     return await axios.get("http://www.yes24.com/Mall/UsedStore/Detail/Seomyeon").then((result) => {
         const returnData = parserYes24Name(result['data']);
+        
         return returnData
     }).then(async (returnData) => {
         const resultData = []
@@ -329,7 +349,7 @@ async function getYes24Names(isbnList, tempFunction) {
         }
         let data
         for (var i = 0; i < returnData.length; i++) {
-            data = await getYes24Info(i, returnData, pushObject);
+            data = await getYes24Info(i, returnData, useLocation, searchRange, pushObject);
         }
         return resultData
     }).then(async (resultData) => {

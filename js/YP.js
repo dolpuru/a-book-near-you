@@ -44,7 +44,7 @@ function getYPCodeNames(codeNameHTML) {
 
 }
 
-async function getLatLonYP(searchKeyWord, ypInfoJson, pushObject) {
+async function getLatLonYP(searchKeyWord, ypInfoJson, userLocation, searchRange, pushObject) {
     //document.write("<script src='https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=l7xx2c101ec10b184ce38225574befab7376'></script>");
     //document.write("<script src='https://code.jquery.com/jquery-3.2.1.min.js'></script>");
     if (searchKeyWord.length == 0) {
@@ -75,7 +75,33 @@ async function getLatLonYP(searchKeyWord, ypInfoJson, pushObject) {
 
                 ypInfoJson.lat = lat
                 ypInfoJson.lon = lon
+
+
+                function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+                    function deg2rad(deg) {
+                        return deg * (Math.PI / 180)
+                    }
+                    var R = 6371; // Radius of the earth in km
+                    var dLat = deg2rad(lat2 - lat1); // deg2rad below
+                    var dLon = deg2rad(lon2 - lon1);
+                    var a =
+                        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2)
+                        ;
+                    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                    var d = R * c; // Distance in km
+                    return d;
+                }
+                // 35.155489508012636/*usrLocation[0]*/, 129.05959731396132/*usrLocation[1]*/
+                if (getDistanceFromLatLonInKm(lat,lon, 35.155489508012636,129.05959731396132) <= searchRange){
+                    
                 pushObject(ypInfoJson)
+                }
+
+
+
+
             },
             error: function (request, status, error) {
                 console.log("code:" + request.status + "\n" + "message:" + request
@@ -88,7 +114,7 @@ async function getLatLonYP(searchKeyWord, ypInfoJson, pushObject) {
 
 
 
-function ypInfoParser(ypName, url, ypInfoHTML, pushObject) {
+function ypInfoParser(ypName, url, ypInfoHTML, userLocation, searchRange, pushObject) {
     var ypInfoJson = new Object();
     // 위도, 경도, 점포명, 휴관일, 운영시간, 매장 전화번호, 매장 url
     // 위도 경도 ypName으로 알아내기
@@ -128,7 +154,7 @@ function ypInfoParser(ypName, url, ypInfoHTML, pushObject) {
     ypInfoJson.url = url
     ypInfoJson.searchResult = []
 
-    getLatLonYP('영풍문고' + ypName, ypInfoJson, pushObject);
+    getLatLonYP('영풍문고' + ypName, ypInfoJson, userLocation, searchRange, pushObject);
 
 
 
@@ -138,9 +164,9 @@ function ypInfoParser(ypName, url, ypInfoHTML, pushObject) {
 
 
 
-async function getYPInfo(ypName, ypCode, pushObject) {
+async function getYPInfo(ypName, ypCode,userLocation, searchRange, pushObject) {
     await axios.get("https://www.ypbooks.co.kr/m_store_view.yp?branchCD=" + ypCode).then(function (result) {
-        ypInfoParser(ypName, "https://www.ypbooks.co.kr/m_store_view.yp?branchCD=" + ypCode, result['data'], pushObject)
+        ypInfoParser(ypName, "https://www.ypbooks.co.kr/m_store_view.yp?branchCD=" + ypCode, result['data'], userLocation, searchRange, pushObject)
         // console.log(ypName)
         // console.timeLog()
     }).catch(function (error) {
@@ -149,7 +175,7 @@ async function getYPInfo(ypName, ypCode, pushObject) {
 }
 
 
-async function getYPbooks(tempFunction) {
+async function getYPbooks(userLocation, searchRange, tempFunction) {
     await axios.get("https://www.ypbooks.co.kr/m_store.yp").then(async function (result) {
         [NameList, codeList] = getYPCodeNames(result['data']);
 
@@ -159,7 +185,7 @@ async function getYPbooks(tempFunction) {
             resultData.push(v);
         }
         for (var i = 0; i < NameList.length; i++) {
-            await getYPInfo(NameList[i], codeList[i], pushObject)
+            await getYPInfo(NameList[i], codeList[i], userLocation, searchRange, pushObject)
         }
 
         return resultData

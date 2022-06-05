@@ -1,4 +1,3 @@
-
 //모든 매장 이름, 코드를 가져온다.
 // <select id="store">를 찾는다.
 // value와 그사이 text를 가져온다.
@@ -60,7 +59,7 @@ function GyoboNameCodeParser(gyoboData) {
 // addr = "서울특별시 서초구 강남대로 465, 교보타워 지하 1~지하 2층"; 
 
 
-function GyoboInfoParser(siteUrl, objectParser, pushObject) {
+function GyoboInfoParser(siteUrl, objectParser, useLocation, searchRange, pushObject) {
     var GyoboInfoJson = new Object();
     var flag1 = '전화번호';
     var flag2 = '영업시간';
@@ -151,22 +150,44 @@ function GyoboInfoParser(siteUrl, objectParser, pushObject) {
 
     GyoboInfoJson.lat = latValue;
     GyoboInfoJson.lon = longtValue;
-    GyoboInfoJson.storeName = storeValue;
-    GyoboInfoJson.closedDay = close;
-    GyoboInfoJson.opertingTime = oper;
-    GyoboInfoJson.telNum = telNumber;
-    GyoboInfoJson.url = siteUrl;
-    GyoboInfoJson.searchResult = [];
-    pushObject(GyoboInfoJson)
+
+    function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+        function deg2rad(deg) {
+            return deg * (Math.PI / 180)
+        }
+        var R = 6371; // Radius of the earth in km
+        var dLat = deg2rad(lat2 - lat1); // deg2rad below
+        var dLon = deg2rad(lon2 - lon1);
+        var a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        var d = R * c; // Distance in km
+        return d;
+    }
+
+    // 35.155489508012636/*usrLocation[0]*/, 129.05959731396132/*usrLocation[1]*/
+    if (getDistanceFromLatLonInKm(latValue, longtValue, 35.155489508012636, 129.05959731396132) <= searchRange) {
+        GyoboInfoJson.storeName = storeValue;
+        GyoboInfoJson.closedDay = close;
+        GyoboInfoJson.opertingTime = oper;
+        GyoboInfoJson.telNum = telNumber;
+        GyoboInfoJson.url = siteUrl;
+        GyoboInfoJson.searchResult = [];
+        pushObject(GyoboInfoJson)
+    }
+
+
     return GyoboInfoJson
 }
 
 
-async function getGyoboInfo(stieCode, pushObject) {
+async function getGyoboInfo(stieCode, useLocation, searchRange, pushObject) {
     // 해당 코드 지점의 정보를 가져온다.
 
     await axios.get("http://www.kyobobook.co.kr/storen/MainStore.laf?SITE=" + stieCode + "&Kc=GNHHNOoffstore&orderClick=rvd").then(function (result) {
-        return GyoboInfoParser("http://www.kyobobook.co.kr/storen/MainStore.laf?SITE=" + stieCode + "&Kc=GNHHNOoffstore&orderClick=rvd", result['data'], pushObject);
+        return GyoboInfoParser("http://www.kyobobook.co.kr/storen/MainStore.laf?SITE=" + stieCode + "&Kc=GNHHNOoffstore&orderClick=rvd", result['data'], useLocation, searchRange, pushObject);
     }).catch(function (error) {
         console.error("에러 발생 : ", error);
     });
@@ -263,7 +284,7 @@ async function getGyoboStock(siteIndex, siteCode, isbn, pushObject2) {
 
 
 // getGyobo
-async function getGyobo(isbnList, tempFunction) {
+async function getGyobo(isbnList, useLocation, searchRange, tempFunction) {
     await axios.get("https://mobile.kyobobook.co.kr/welcomeStore/storeSearchList").then(function (result) {
             const getGyoboNameCodes = GyoboNameCodeParser(result['data']);
             return getGyoboNameCodes
@@ -279,7 +300,7 @@ async function getGyobo(isbnList, tempFunction) {
                 if (getGyoboNameCodes[i][0] == 'E6') {
                     continue
                 }
-                data = getGyoboInfo(getGyoboNameCodes[i][0], pushObject);
+                data = getGyoboInfo(getGyoboNameCodes[i][0], useLocation, searchRange, pushObject);
             }
 
 
@@ -344,4 +365,3 @@ async function getGyobo(isbnList, tempFunction) {
 //
 //
 //
-
