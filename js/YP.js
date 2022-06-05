@@ -161,8 +161,9 @@ function parserYPInfo(ypName, url, ypInfoHTML, userLocation, searchRange, pushOb
 
 // 영풍문고 정보 확인
 async function getYPInfo(ypName, ypCode,userLocation, searchRange, pushObject) {
-    await axios.get("https://www.ypbooks.co.kr/m_store_view.yp?branchCD=" + ypCode).then(function (result) {
-        parserYPInfo(ypName, "https://www.ypbooks.co.kr/m_store_view.yp?branchCD=" + ypCode, result['data'], userLocation, searchRange, pushObject)
+    url = "https://www.ypbooks.co.kr/m_store_view.yp?branchCD=" + ypCode
+    await axios.get(url).then(function (result) {
+        parserYPInfo(ypName, url, result['data'], userLocation, searchRange, pushObject)
 
     }).catch(function (error) {
         console.error("에러 발생 : ", error);
