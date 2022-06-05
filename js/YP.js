@@ -1,9 +1,10 @@
+// 영풍문고 지점별 이름, 코드 확인
 function getYPCodeNames(codeNameHTML) {
     var flag1 = '<div class="store-con">';
     var flag2 = 'branchCD=';
 
     var codeList = [];
-    var NameList = [];
+    var nameList = [];
 
     var index = codeNameHTML.indexOf(flag1, 0)
     while (index > 1) {
@@ -35,18 +36,17 @@ function getYPCodeNames(codeNameHTML) {
 
         }
 
-        NameList.push(tmp)
+        nameList.push(tmp)
     }
     codeList.pop()
-    NameList.pop()
+    nameList.pop()
 
-    return [NameList, codeList]
+    return [nameList, codeList]
 
 }
 
+// 영풍문고 지점명에 대한 위치 확인
 async function getLatLonYP(searchKeyWord, ypInfoJson, userLocation, searchRange, pushObject) {
-    //document.write("<script src='https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=l7xx2c101ec10b184ce38225574befab7376'></script>");
-    //document.write("<script src='https://code.jquery.com/jquery-3.2.1.min.js'></script>");
     if (searchKeyWord.length == 0) {
         return NULL;
     } else {
@@ -103,18 +103,15 @@ async function getLatLonYP(searchKeyWord, ypInfoJson, userLocation, searchRange,
 
 
             },
-            error: function (request, status, error) {
-                console.log("code:" + request.status + "\n" + "message:" + request
-                    .responseText + "\n" + "error:" + error);
+            error: function (error) {
+                console.error("에러 발생 : ", error);
             }
         });
     }
 }
 
-
-
-
-function ypInfoParser(ypName, url, ypInfoHTML, userLocation, searchRange, pushObject) {
+// 영풍문고 정보 결과 파서
+function parserYPInfo(ypName, url, ypInfoHTML, userLocation, searchRange, pushObject) {
     var ypInfoJson = new Object();
     // 위도, 경도, 점포명, 휴관일, 운영시간, 매장 전화번호, 매장 url
     // 위도 경도 ypName으로 알아내기
@@ -148,8 +145,8 @@ function ypInfoParser(ypName, url, ypInfoHTML, userLocation, searchRange, pushOb
     // url => url
 
     ypInfoJson.storeName = ypName
-    ypInfoJson.closeDay = "-"
-    ypInfoJson.opertingTime = ypOper
+    ypInfoJson.closedDay = "-"
+    ypInfoJson.operatingTime = ypOper
     ypInfoJson.telNum = ypTel
     ypInfoJson.url = url
     ypInfoJson.searchResult = []
@@ -162,38 +159,41 @@ function ypInfoParser(ypName, url, ypInfoHTML, userLocation, searchRange, pushOb
 
 }
 
-
-
+// 영풍문고 정보 확인
 async function getYPInfo(ypName, ypCode,userLocation, searchRange, pushObject) {
     await axios.get("https://www.ypbooks.co.kr/m_store_view.yp?branchCD=" + ypCode).then(function (result) {
-        ypInfoParser(ypName, "https://www.ypbooks.co.kr/m_store_view.yp?branchCD=" + ypCode, result['data'], userLocation, searchRange, pushObject)
-        // console.log(ypName)
-        // console.timeLog()
+        parserYPInfo(ypName, "https://www.ypbooks.co.kr/m_store_view.yp?branchCD=" + ypCode, result['data'], userLocation, searchRange, pushObject)
+
     }).catch(function (error) {
         console.error("에러 발생 : ", error);
     });
 }
 
+// 영풍문고 시작
+async function startYPbooks(userLocation, searchRange, tempFunction) {
 
-async function getYPbooks(userLocation, searchRange, tempFunction) {
-    await axios.get("https://www.ypbooks.co.kr/m_store.yp").then(async function (result) {
-        [NameList, codeList] = getYPCodeNames(result['data']);
+    var url = "https://www.ypbooks.co.kr/m_store.yp"
+    var ypName = '영풍문고';
+    var ypImg = './images/youngpung.png';
+    
+    await axios.get(url).then(async function (result) {
+        [nameList, codeList] = getYPCodeNames(result['data']);
 
-        // console.log('tester', codeList)
+
         const resultData = []
         const pushObject = (v) => {
             resultData.push(v);
         }
-        for (var i = 0; i < NameList.length; i++) {
-            await getYPInfo(NameList[i], codeList[i], userLocation, searchRange, pushObject)
+        for (var i = 0; i < nameList.length; i++) {
+            await getYPInfo(nameList[i], codeList[i], userLocation, searchRange, pushObject)
         }
 
         return resultData
     }).then(function (result) {
         console.log('result', result)
-        tempFunction(result, '영풍문고', './images/youngpung.png')
+        tempFunction(result, ypName, ypImg)
 
-    }).catch(function (error) {
+    }).catch(function (error) { // 에러처리
         console.error("에러 발생 : ", error);
     });
 

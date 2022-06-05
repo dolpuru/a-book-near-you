@@ -1,4 +1,4 @@
-// Yes24 이름 입력 시 위치 받아옴
+// Yes24 지점명에 대한 위치 확인
 function getYes24LatLon(searchKeyWord, data, test, url, userLocation, searchRange, pushObject) {
     var Yes24InfoJson = new Object();
 
@@ -52,7 +52,7 @@ function getYes24LatLon(searchKeyWord, data, test, url, userLocation, searchRang
                 if (getDistanceFromLatLonInKm(lat, lon, 35.155489508012636, 129.05959731396132) <= searchRange) {
                     Yes24InfoJson.storeName = test
                     Yes24InfoJson.closedDay = data[3];
-                    Yes24InfoJson.opertingTime = data[2];
+                    Yes24InfoJson.operatingTime = data[2];
                     Yes24InfoJson.telNum = data[1];
                     Yes24InfoJson.url = url;
                     Yes24InfoJson.searchResult = [];
@@ -339,7 +339,7 @@ function parserYes24Name(nameHtml) {
 
 };
 
-// Yes24 시작
+// Yes24 크롤링 시작
 async function startYes24(isbnList, userLocation, searchRange, makerFunction) {
 
     var url = "http://www.yes24.com/Mall/UsedStore/Detail/Seomyeon";
