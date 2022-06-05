@@ -125,15 +125,15 @@ function parserGyoboInfo(siteUrl, objectParser, userLocation, searchRange, pushO
 }
 
 // 교보문고 정보 확인
-async function getGyoboInfo(stieCode, useLocation, searchRange, pushObject) {
+async function getGyoboInfo(siteCode, useLocation, searchRange, pushObject) {
 	// 해당 코드 지점의 정보를 가져온다.
-	var url = "http://www.kyobobook.co.kr/storen/MainStore.laf?SITE=" + stieCode + "&Kc=GNHHNOoffstore&orderClick=rvd"
+	var url = "http://www.kyobobook.co.kr/storen/MainStore.laf?SITE=" + siteCode + "&Kc=GNHHNOoffstore&orderClick=rvd"
 	await axios.get(url).then(function(result) {
 		return parserGyoboInfo(url, result['data'], useLocation, searchRange, pushObject);
 	}).catch(function(error) {
 		console.error("에러 발생 : ", error);
 	});
-
+ 
 }
 
 // 교보문고 재고결과 파서
