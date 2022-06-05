@@ -11,8 +11,12 @@
 	<script src="https://requirejs.org/docs/release/2.3.5/minified/require.js"></script>
 	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 	<script src="https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=l7xx2c101ec10b184ce38225574befab7376"></script>
-
-
+	
+	
+	<script type="text/javascript" src="./json/IndependentStoreList.json"></script>
+	<script src="./js/startIndependentStore.js"></script>
+	<script src="./js/pubLibStart.js"></script>
+	<script src="./js/aladinStart.js"></script>
 	<script src="./js/YES24.js"></script>
 	<script src="./js/YP.js"></script>
 	<script src="./js/GYOBO.js"></script>
@@ -29,7 +33,7 @@
 	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&family=Noto+Sans+KR&display=swap"
 		rel="stylesheet">
 
-<body onload="initTmap();">
+<body onload="init();">
 	<div class="layout">
 		<div id="sideBar">
 			<!-- 제목 및 검색바 -->
@@ -37,7 +41,7 @@
 				<div class="teamName">Mains</div>
 				<div class="searchBarBox">
 					<input class="bookSearchBar"></input>
-					<button class="iconCircle">
+					<button class="iconCircle" onclick = "getTitle();">
 						<i class="fa-solid fa-magnifying-glass"></i> <!-- 검색 아이콘 -->
 					</button>
 				</div>
@@ -48,10 +52,10 @@
 			<nav class="getDirections">
 
 				<div class="depart">
-					<img src="./images/depart.png"> <!-- 출발 아이콘 -->
+					<img src="./images/depart.png" style = 'cursor : pointer;'> <!-- 출발 아이콘 -->
 					<input class="searchDepartBar"></input>
 					<button class="orderSwitchingIcon">
-						<i class="fa-solid fa-repeat"></i><!-- 스위치 아이콘 -->
+						<i class="fa-solid fa-repeat" onclick = "barChange();"></i><!-- 스위치 아이콘 -->
 					</button>
 				</div>
 
@@ -67,10 +71,15 @@
 
 			<div class="searchSetting">
 
-				<div class="controllerName">검색 반경설정</div>
+				<div class="controllerName">검색 반경설정
+					<p>
+							<span class = "rangeValue">1</span>
+							<span>km</span>
+					</p>
+				</div>
 				<div class="radiusController">
-					<div>0km</div>
-					<input type="range" class="customizing">
+					<div>1km</div>
+					<input type="range" value = "1" min = "1" max = "10" class="slider" onclick = "rangeView();">
 					<div>10km</div>
 				</div>
 
@@ -80,11 +89,7 @@
 			<section class="bookSection">
 
 				<div class="bookSectionHeaderName">내 주변 도서 제공처</div>
-				<div class="bookSectionSources">
-					<div class="bookSectionSource1">ex1</div>
-					<div class="bookSectionSource2">ex2</div>
-					<div class="bookSectionSource3">ex3</div>
-				</div>
+				<div class="bookSectionSources"></div>
 
 			</section>
 		</div>

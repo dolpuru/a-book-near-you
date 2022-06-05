@@ -112,7 +112,7 @@ function getLatLon(searchKeyWord, data, test, url, pushObject) {
                 "searchKeyword": searchKeyWord,
                 "resCoordType": "EPSG3857",
                 "reqCoordType": "WGS84GEO",
-                "count": 10
+                "count": 1
             },
             success: function (response) {
                 var resultpoisData = response.searchPoiInfo.pois.poi;
@@ -128,7 +128,7 @@ function getLatLon(searchKeyWord, data, test, url, pushObject) {
                 Yes24InfoJson.lat = lat; // data[0] 을 좌표로 변환하는 함수 필요
                 Yes24InfoJson.lon = lon;
                 Yes24InfoJson.storeName = test
-                Yes24InfoJson.closeDay = data[3];
+                Yes24InfoJson.closedDay = data[3];
                 Yes24InfoJson.opertingTime = data[2];
                 Yes24InfoJson.telNum = data[1];
                 Yes24InfoJson.url = url;

@@ -59,7 +59,7 @@ async function getLatLonYP(searchKeyWord, ypInfoJson, pushObject) {
                 "searchKeyword": searchKeyWord,
                 "resCoordType": "EPSG3857",
                 "reqCoordType": "WGS84GEO",
-                "count": 10
+                "count": 1
             },
             success: function (response) {
                 var resultpoisData = response.searchPoiInfo.pois.poi;
