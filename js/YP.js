@@ -94,7 +94,7 @@ async function getLatLonYP(searchKeyWord, ypInfoJson, userLocation, searchRange,
                     return d;
                 }
                 // 35.155489508012636/*usrLocation[0]*/, 129.05959731396132/*usrLocation[1]*/
-                if (getDistanceFromLatLonInKm(lat,lon, 35.155489508012636,129.05959731396132) <= searchRange){
+                if (getDistanceFromLatLonInKm(lat,lon, userLocation[0],userLocation[1]) <= searchRange){
                     
                 pushObject(ypInfoJson)
                 }
@@ -117,13 +117,13 @@ function parserYPInfo(ypName, url, ypInfoHTML, userLocation, searchRange, pushOb
     // 위도 경도 ypName으로 알아내기
     // 점포명 ypName
 
+    INF = 10000
     //영업시간 "영업시간 :"찾고 li찾으면됨
-
     var index = ypInfoHTML.indexOf("영업시간 :", 0)
     var flag2 = "li>"
     index = ypInfoHTML.indexOf(flag2, index + 10)
     var ypOper = ''
-    for (var i = index + flag2.length; i < 10000; i++) {
+    for (var i = index + flag2.length; i < INF; i++) {
         if (ypInfoHTML[i] == '<') {
             break
         }
@@ -135,7 +135,7 @@ function parserYPInfo(ypName, url, ypInfoHTML, userLocation, searchRange, pushOb
     var flag1 = "tel:"
     var index = ypInfoHTML.indexOf(flag1, 0)
     var ypTel = ''
-    for (var i = index + flag1.length; i < 10000; i++) {
+    for (var i = index + flag1.length; i < INF; i++) {
         if (ypInfoHTML[i] == '"') {
             break
         }
@@ -143,7 +143,6 @@ function parserYPInfo(ypName, url, ypInfoHTML, userLocation, searchRange, pushOb
     }
 
     // url => url
-
     ypInfoJson.storeName = ypName
     ypInfoJson.closedDay = "-"
     ypInfoJson.operatingTime = ypOper
@@ -171,7 +170,7 @@ async function getYPInfo(ypName, ypCode,userLocation, searchRange, pushObject) {
 }
 
 // 영풍문고 시작
-async function startYPbooks(userLocation, searchRange, tempFunction) {
+async function startYPbooks(userLocation, searchRange, makerFunction) {
 
     var url = "https://www.ypbooks.co.kr/m_store.yp"
     var ypName = '영풍문고';
@@ -192,7 +191,7 @@ async function startYPbooks(userLocation, searchRange, tempFunction) {
         return resultData
     }).then(function (result) {
         console.log('result', result)
-        tempFunction(result, ypName, ypImg)
+        makerFunction(result, ypName, ypImg)
 
     }).catch(function (error) { // 에러처리
         console.error("에러 발생 : ", error);

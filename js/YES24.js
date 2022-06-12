@@ -125,11 +125,11 @@ function parserYes24Info(nameHtml) {
 async function getYes24Info(index, storeName, userLocation, searchRange, pushObject) {
 
     var url = "http://www.yes24.com/Mall/UsedStore/Detail/" + storeName[index][0];
-    var sotreName = storeName[index][1];
+    var storeName_ = storeName[index][1];
 
     await axios.get(url).then(function (result) { // 결과 발생시에만 push
         var data = parserYes24Info(result['data']);
-        return getYes24LatLon('Yes24 ' + sotreName, data, sotreName, url, userLocation, searchRange, pushObject);
+        return getYes24LatLon('Yes24 ' + storeName_, data, storeName_, url, userLocation, searchRange, pushObject);
 
     }).catch(function (error) {
         console.error("에러 발생 : ", error);

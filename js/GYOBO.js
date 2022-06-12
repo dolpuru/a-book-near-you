@@ -110,7 +110,7 @@ function parserGyoboInfo(siteUrl, objectParser, userLocation, searchRange, pushO
 	}
 
 	// 35.155489508012636/*usrLocation[0]*/, 129.05959731396132/*usrLocation[1]*/
-	if (getDistanceFromLatLonInKm(latValue, longtValue, 35.155489508012636, 129.05959731396132) <= searchRange) {
+	if (getDistanceFromLatLonInKm(latValue, longtValue, userLocation[0], usrLocation[1]) <= searchRange) {
 		GyoboInfoJson.storeName = storeValue;
 		GyoboInfoJson.closedDay = close;
 		GyoboInfoJson.operatingTime = oper;
