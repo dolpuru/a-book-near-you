@@ -1,5 +1,5 @@
-// 교보문고 정보 결과 파서 
-function parserGyoboInfo(siteUrl, objectParser, userLocation, searchRange, pushObject) {
+// 교보문고 정보 결과 파서
+function parserGyoboInfo(siteUrl, objectParser, userLocation, searchRange, pushObject, siteCode) {
 	var GyoboInfoJson = new Object();
 	var flag1 = '전화번호';
 	var flag2 = '영업시간';
@@ -110,14 +110,16 @@ function parserGyoboInfo(siteUrl, objectParser, userLocation, searchRange, pushO
 	}
 
 	// 35.155489508012636/*usrLocation[0]*/, 129.05959731396132/*usrLocation[1]*/
-	if (getDistanceFromLatLonInKm(latValue, longtValue, userLocation[0], usrLocation[1]) <= searchRange) {
+	if (getDistanceFromLatLonInKm(latValue, longtValue, userLocation[0], userLocation[1]) <= searchRange) {
 		GyoboInfoJson.storeName = storeValue;
 		GyoboInfoJson.closedDay = close;
 		GyoboInfoJson.operatingTime = oper;
 		GyoboInfoJson.telNum = telNumber;
 		GyoboInfoJson.url = siteUrl;
 		GyoboInfoJson.searchResult = [];
+		GyoboInfoJson.key = siteCode;
 		pushObject(GyoboInfoJson)
+		console.log('url!!!',siteUrl)
 	}
 
 
@@ -125,15 +127,19 @@ function parserGyoboInfo(siteUrl, objectParser, userLocation, searchRange, pushO
 }
 
 // 교보문고 정보 확인
-async function getGyoboInfo(siteCode, useLocation, searchRange, pushObject) {
+async function getGyoboInfo(i, getGyoboNameCodes,  useLocation, searchRange, pushObject) {
 	// 해당 코드 지점의 정보를 가져온다.
+	siteCode = getGyoboNameCodes[i][0]
 	var url = "http://www.kyobobook.co.kr/storen/MainStore.laf?SITE=" + siteCode + "&Kc=GNHHNOoffstore&orderClick=rvd"
-	await axios.get(url).then(function(result) {
-		return parserGyoboInfo(url, result['data'], useLocation, searchRange, pushObject);
-	}).catch(function(error) {
+	
+	await axios.get(url).then(async function (result) {
+		console.log('siteCode', siteCode)
+		 parserGyoboInfo(url, result['data'], useLocation, searchRange, pushObject, siteCode);
+	}).catch(function (error) {
 		console.error("에러 발생 : ", error);
+
 	});
- 
+
 }
 
 // 교보문고 재고결과 파서
@@ -183,6 +189,7 @@ function parserGyoboStock(siteIndex, stockHtml, pushObject) {
 		gyoboStock += stockHtml[i]
 	}
 
+	console.log('교보문고 재고 기록 !!!!!!!!!!!!!!!!!!', gyoboStock)
 	//재고
 	var index = stockHtml.indexOf(flag4, 0)
 	var index = stockHtml.indexOf(flag5, index + 10)
@@ -215,11 +222,12 @@ function parserGyoboStock(siteIndex, stockHtml, pushObject) {
 
 // 교보문고 재고 확인
 async function getGyoboStock(siteIndex, siteCode, isbn, pushObject) {
-
+	console.log('testeset')
 	var url = "https://mobile.kyobobook.co.kr/welcomeStore/storeSearchDetail?siteCode=" + siteCode + "&productType=KOR&barcode=" + isbn
-	await axios.get(url).then(function(result) {
+	await axios.get(url).then(function (result) {
+		console.log('재고 htmlzhem!!!!!!!!!!!!!11', result['data'])
 		return parserGyoboStock(siteIndex, result['data'], pushObject)
-	}).catch(function(error) {
+	}).catch(function (error) {
 		console.error("에러 발생 : ", error);
 	});
 
@@ -283,11 +291,10 @@ async function startGyobo(isbnList, userLocation, searchRange, makerFunction) {
 	var gyoboName = '교보문고';
 	var gyoboImg = './images/kyobo.png';
 
-	await axios.get(url).then(function(result) {
-			const getGyoboNameCodes = parserGyoboNameCode(result['data']);
-			return getGyoboNameCodes
+	return await axios.get(url).then((result) => {
+			return parserGyoboNameCode(result['data']);
 		})
-		.then((getGyoboNameCodes) => {
+		.then(async (getGyoboNameCodes) => {
 			const resultData = []
 			const pushObject = (v) => {
 				resultData.push(v);
@@ -297,45 +304,44 @@ async function startGyobo(isbnList, userLocation, searchRange, makerFunction) {
 				if (getGyoboNameCodes[i][0] == 'E6') {
 					continue
 				}
-				getGyoboInfo(getGyoboNameCodes[i][0], userLocation, searchRange, pushObject);
+				await getGyoboInfo(i, getGyoboNameCodes, userLocation, searchRange, pushObject);
 			}
 
-
-			return [resultData, getGyoboNameCodes]
+			console.log('return', resultData)
+			return resultData
 
 		})
-		.then(async ([resultData, getGyoboNameCodes]) => {
+		.then(async (getData) => {
 
 			const pushObject = (i, v) => {
-				resultData[i]['searchResult'].push(v);
+				getData[i]['searchResult'].push(v);
 			}
+
 			var siteIndex = 0
-			for (var i = 0; i < getGyoboNameCodes.length; i++) {
-				if (getGyoboNameCodes[i][0] == 'E6') {
-					continue
-				}
-				for (var k = 0; k < resultData.length; k++) {
-					if (resultData[k]['storeName'] == '교보문고 ' + getGyoboNameCodes[i][1]) {
-						siteIndex = k
-						break
 
-					}
-				}
 
+			for (var k = 0; k < getData.length; k++) {
+
+				siteIndex = k
+				console.log(isbnList.length)
 				for (var j = 0; j < isbnList.length; j++) {
 
-					await getGyoboStock(siteIndex, getGyoboNameCodes[i][0], isbnList[j], pushObject)
+					await getGyoboStock(siteIndex, getData[k]['key'], isbnList[j], pushObject)
+					console.log('key!!!!!!!!!!!!!!', getData[k]['key'])
 				}
+
 			}
 
-			return resultData
+			return getData
 
 
 
 		}).then((result) => {
 			makerFunction(result, gyoboName, gyoboImg);
+			console.log('result!!!', result)
+			document.getElementsByClassName('loadBox')[0].style.display = "none";
 		})
-		.catch(function(error) { // 에러 처리
+		.catch(function (error) { // 에러 처리
 			console.error("에러 발생 : ", error);
 		});
 }

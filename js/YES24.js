@@ -49,7 +49,8 @@ function getYes24LatLon(searchKeyWord, data, storeName, url, userLocation, searc
 
                 // 35.155489508012636/*usrLocation[0]*/, 129.05959731396132/*usrLocation[1]*/
                 // 근처의 도서만 Object를 만듭니다.
-                if (getDistanceFromLatLonInKm(lat, lon, usrLocation[0], usrLocation[1]) <= searchRange) {
+                // console.log('userLocation', userLocation)
+                if (getDistanceFromLatLonInKm(lat, lon, userLocation[0], userLocation[1]) <= searchRange) {
                     Yes24InfoJson.storeName = storeName
                     Yes24InfoJson.closedDay = data[3];
                     Yes24InfoJson.operatingTime = data[2];
@@ -121,7 +122,7 @@ function parserYes24Info(nameHtml) {
 
 };
 
-// Yes24 정보 확인 
+// Yes24 정보 확인
 async function getYes24Info(index, storeName, userLocation, searchRange, pushObject) {
 
     var url = "http://www.yes24.com/Mall/UsedStore/Detail/" + storeName[index][0];
@@ -385,7 +386,7 @@ async function startYes24(isbnList, userLocation, searchRange, makerFunction) {
     }).then((result) => { // 마커를 생성합니다.
 
         makerFunction(result, yes24Name, yes24Img);
-
+        
     }).catch(function (error) { // 에러 처리합니다.
         console.error("에러 발생 : ", error);
     });

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
+
+	<!-- 타이틀 및 로고 설정  -->
+	<title>Mains</title>
+	<link rel="shortcut icon" type="image/x-icon" href="../images/logo.png">
+
+	<!-- css 파일, 폰트 및 아이콘 연결 -->
+	<link rel="stylesheet" href="../css/mainPage.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<link rel="stylesheet" href="../css/load.css">
+
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap" rel="stylesheet">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&family=Noto+Sans+KR&display=swap" rel="stylesheet">
+
+	<!-- api 및 js 파일 연결  -->
+	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+	<script src="https://requirejs.org/docs/release/2.3.5/minified/require.js"></script>
+	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+	<script src="https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=l7xx2c101ec10b184ce38225574befab7376"></script>
+
+	<script type="text/javascript" src="../json/IndependentStoreList.json"></script>
+	<script src = "../js/marker.js"></script>
+	<script src = "../js/recommendWay.js"></script>
+	<script src = "../js/sideBar.js"></script>
+	<script src="../js/gyobo.js"></script>
+	<script src="../js/aladin.js"></script>
+	<script src="../js/publicLib.js"></script>
+	<script src="../js/independentStore.js"></script>
+	<script src="../js/yes24.js"></script>
+	<script src="../js/yp.js"></script>
+	<script src="../js/map.js"></script>
+
+	<body onload="initTmap();">
+		<!-- 레이아웃 -->
+		<div class="layout">
+			<div id="sideBar">
+
+				<!-- 제목 및 검색바 -->
+				<header>
+					<div class="teamName">Mains</div>
+					<div class="searchBarBox">
+						<input class="bookSearchBar"></input>
+						<button class="iconCircle" onclick="getBookTitle();"> <i class="fa-solid fa-magnifying-glass"></i>
+						</button>
+					</div>
+				</header>
+
+				<!-- 길찾기 -->
+				<nav class="getDirections">
+
+					<!-- 출발 검색 -->
+					<div class="depart"> <img class="departBtn" src="../images/depart.png" style='cursor : pointer;' onclick="presentMarker();">
+						<input class="searchDepartBar" value=""></input>
+						<input type="hidden" class="searchDepartBarValue" value=""></input>
+						<button class="orderSwitchingIcon"> <i class="fa-solid fa-location-crosshairs" onclick="setStartName();"></i>
+						</button>
+					</div>
+
+					<!-- 도착 검색 -->
+					<div class="arrive"> <img src="../images/arrive.png">
+						<input class="searchArriveBar"></input>
+						<input type="hidden" class="searchArriveBarValue" value="">
+						<button class="closeIcon"> <i class="fa-solid fa-xmark"></i>
+						</button>
+					</div>
+
+				</nav>
+
+				<!-- 검색 반경설정 -->
+				<div class="searchSetting">
+
+					<!-- 검색 반경설정 헤더 -->
+					<div class="controllerName">검색 반경설정
+						<p> <span class="rangeValue">1</span> <span>km</span> </p>
+					</div>
+
+					<!-- 검색 반경설정바 -->
+					<div class="radiusController">
+						<input type="range" value="1" min="1" max="10" class="slider" onclick="rangeView();">
+					</div>
+
+				</div>
+
+				<!-- 도서 제공처 -->
+				<section class="bookSection">
+					<div class="bookSectionHeaderName">내 주변 도서 제공처</div>
+					<div class="bookSectionSources"></div>
+				</section>
+
+			</div>
+
+			<!-- 추천 경로 사이드바 -->
+			<div id="routeSideBar">
+
+				<!-- 도보/자동차 선택바 -->
+				<div id="routeHeader">
+					<div class="routeguide">추천 경로 안내</div>
+					<input class="cancel" type="image" src="../images/xbutton.png" alt="취소 버튼" style='cursor : pointer;' onclick="changeSideBar();">
+					<div class="choice">
+						<div class="walkPress">
+							<img class="walk" type="image" src="../images/walk.png" alt="보행 버튼" onclick="recommendWayDir();">
+						</div>
+
+						<div class ="carPress">
+							<img class="car" type="image" onclick="recommendWayCar();" src="../images/car.png" alt="차량 버튼">
+						</div>
+					</div>
+				</div>
+
+				<!-- 길찾기 -->
+				<nav class="guideDirections">
+					<div class="shortestdistance">최단 거리</div>
+					<div class="shortGuide">
+						<div class="leadtime">8분</div>
+						<div class="distance">941m</div>
+					</div>
+					<div class="departStation"> <img class="departIcon" src="../images/depart.png">
+						<div class="departPoint">부경대학교 대연캠퍼스</div>
+					</div>
+					<div class="detailedGuide"></div>
+					<div class="arriveStation"> <img class="arriveIcon" src="../images/arrive.png">
+						<div class="arrivePoint">교보문고 경성대부경대센터</div>
+					</div>
+				</nav>
+
+			</div>
+
+			<!-- 사이드바 토글버튼 -->
+			<button id="leftToggle" onclick="toggleBar('sideBar', 'leftToggle', 'rightToggle');"> <i class="fa-solid fa-angle-left"></i> </button>
+			<button id="rightToggle" onclick="toggleBar('sideBar', 'leftToggle', 'rightToggle');"> <i class="fa-solid fa-angle-right"></i> </button>
+
+			<!-- 맵 레이아웃 -->
+			<div id="map_div" class="map_wrap"></div>
+		</div>
+
+		<!-- 로딩 화면 -->
+		<div class="loadBox">
+
+		<svg viewbox="0 0 128 128" width="100%" height="100%">
+				<path class="doc"
+						d="M0-0.00002,0,3.6768,0,124.32,0,128h4.129,119.74,4.129v-3.6769-120.65-3.6768h-4.129-119.74zm8.2581,7.3537,111.48,0,0,113.29-111.48,0zm13.626,25.048,0,7.3537,57.806,0,0-7.3537zm0,19.12,0,7.3537,84.232,0,0-7.3537zm0,17.649,0,7.3537,84.232,0,0-7.3537zm0,19.12,0,7.3537,84.232,0,0-7.3537z7z" />
+				<path class="magnify"
+						d="M38.948,10.429c-18.254,10.539-24.468,33.953-14.057,51.986,9.229,15.984,28.649,22.764,45.654,16.763-0.84868,2.6797-0.61612,5.6834,0.90656,8.3207l17.309,29.98c2.8768,4.9827,9.204,6.6781,14.187,3.8013,4.9827-2.8768,6.6781-9.204,3.8013-14.187l-17.31-29.977c-1.523-2.637-4.008-4.34-6.753-4.945,13.7-11.727,17.543-31.935,8.31-47.919-10.411-18.034-33.796-24.359-52.049-13.82zm6.902,11.955c11.489-6.633,26.133-2.7688,32.893,8.9404,6.7603,11.709,2.7847,26.324-8.704,32.957-11.489,6.632-26.133,2.768-32.893-8.941-6.761-11.709-2.785-26.324,8.704-32.957z" />
+				</svg>
+
+		</div>
+
+	</body>
+
+</html>

@@ -95,7 +95,7 @@ async function getLatLonYP(searchKeyWord, ypInfoJson, userLocation, searchRange,
                 }
                 // 35.155489508012636/*usrLocation[0]*/, 129.05959731396132/*usrLocation[1]*/
                 if (getDistanceFromLatLonInKm(lat,lon, userLocation[0],userLocation[1]) <= searchRange){
-                    
+
                 pushObject(ypInfoJson)
                 }
 
@@ -130,7 +130,7 @@ function parserYPInfo(ypName, url, ypInfoHTML, userLocation, searchRange, pushOb
         ypOper += ypInfoHTML[i]
     }
 
-    // 휴관일 : 없음 
+    // 휴관일 : 없음
     // 전화번호 : tel:찾으면됨
     var flag1 = "tel:"
     var index = ypInfoHTML.indexOf(flag1, 0)
@@ -144,7 +144,7 @@ function parserYPInfo(ypName, url, ypInfoHTML, userLocation, searchRange, pushOb
 
     // url => url
     ypInfoJson.storeName = ypName
-    ypInfoJson.closedDay = "-"
+    ypInfoJson.closedDay = '휴무 정보가 제공되지 않습니다.'
     ypInfoJson.operatingTime = ypOper
     ypInfoJson.telNum = ypTel
     ypInfoJson.url = url
@@ -175,7 +175,7 @@ async function startYPbooks(userLocation, searchRange, makerFunction) {
     var url = "https://www.ypbooks.co.kr/m_store.yp"
     var ypName = '영풍문고';
     var ypImg = './images/youngpung.png';
-    
+
     await axios.get(url).then(async function (result) {
         [nameList, codeList] = getYPCodeNames(result['data']);
 
@@ -192,7 +192,6 @@ async function startYPbooks(userLocation, searchRange, makerFunction) {
     }).then(function (result) {
         console.log('result', result)
         makerFunction(result, ypName, ypImg)
-
     }).catch(function (error) { // 에러처리
         console.error("에러 발생 : ", error);
     });

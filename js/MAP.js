@@ -1,232 +1,240 @@
-async function init()
-{
-  map = new Tmapv2.Map("map_div", {
-      center: new Tmapv2.LatLng(33.450701, 126.570667), // 반경설정해서 위경도
-      width: "100vw",
-      height: "100vh",
-      zoomControl: true,
-      scrollwheel: true
-  });
+// 책 제목을 받아 지도 검색
+async function getBookTitle() {
+    var bookTitle = document.getElementsByClassName('bookSearchBar')[0].value;
+    var searchRange = document.getElementsByClassName('slider')[0].value;
+    var isbnList = await getIsbnList(bookTitle);
 
-  if (navigator.geolocation) {
-			navigator.geolocation.getCurrentPosition(
-				function(position) {
-					var lat = position.coords.latitude;
-					var lon = position.coords.longitude;
+    // document.getElementsByClassName('loadBox')[0].style.display = "block";
+    console.log(1);
 
-					marker = new Tmapv2.Marker({
-						position : new Tmapv2.LatLng(lat,lon),
-						map : map
-					});
-
-					map.setCenter(new Tmapv2.LatLng(lat,lon));
-				});
-      }
-
-      marker1 = new Tmapv2.Marker(
-          {
-            icon : "http://tmapapi.sktelecom.com/upload/tmap/marker/pin_b_m_a.png",
-            iconSize : new Tmapv2.Size(24, 38),
-            map : map
-          });
-
-      // 2. API 사용요청
-      var lon, lat;
-
-      map.addListener(
-              "click",
-              async function onClick(evt) {
-                var mapLatLng = evt.latLng;
-
-                //기존 마커 삭제
-                marker1.setMap(null);
-
-                var markerPosition = new Tmapv2.LatLng(
-                    mapLatLng._lat, mapLatLng._lng);
-                //마커 올리기
-                marker1 = new Tmapv2.Marker(
-                    {
-                      position : markerPosition,
-                      icon : "http://tmapapi.sktelecom.com/upload/tmap/marker/pin_b_m_p.png",
-                      iconSize : new Tmapv2.Size(24, 38),
-                      map : map
-                    });
-
-                res = await getBuildingName(mapLatLng._lng, mapLatLng._lat);
-                res = res.addressInfo;
-                var buildingName;
-                if(res.buildingName.length != 0) {
-                  buildingName = res.buildingName;
-                } else {
-                  buildingName = res.gu_gun + ' '+ res.roadName + ' '+res.buildingIndex;
-                }
-                console.log(buildingName);
-              });
-
-      function getBuildingName(lon, lat) {
-        return $.ajax({
-              method : "GET",
-              url : "https://apis.openapi.sk.com/tmap/geo/reversegeocoding?version=1&format=json&callback=result",
-              async : false,
-              data : {
-                "appKey" : "l7xx2c101ec10b184ce38225574befab7376",
-                "coordType" : "WGS84GEO",
-                "addressType" : "A10",
-                "lon" : lon,
-                "lat" : lat
-              },
-              error : function(request, status, error) {
-                console.log("code:" + request.status + "\n"
-                    + "message:" + request.responseText + "\n"
-                    + "error:" + error);
-              }
-            });
-
-      }
+    // 위치 기반 검색
+    searchTmap(isbnList,searchRange);
+    document.getElementsByClassName('loadBox')[0].style.display = "block";
+    document.getElementsByClassName('loadBox')[0].style.display = "none";
+    // 로딩 테스트
+    console.log(2);
 }
 
-async function initTmap(IsbnLists, searchRange) {
-    // 1. 지도 띄우기
+// 책 제목을 기준으로 isbn 리스트 검색
+async function getIsbnList(title) {
+    var isbnList = [];
+    if (title.length == 0)
+        return;
+    let url =
+        "https://www.nl.go.kr/seoji/SearchApi.do?cert_key=26946e3d5253c3fa71ccf451aeab972c7a303cbdc213c80c7306c9d1374255b9&title=" +
+        title + "&result_style=json&page_no=1&page_size=10";
+    var count = 0;
+    var data = await fetch(url).then(res => res.json());
+    data = data['docs'];
+    for (k in data) {
 
+        if (data[k]['EA_ISBN'].length == 0) {
+            continue;
+        }
+        isbnList.push(data[k]['EA_ISBN']);
+        count++;
+        if (count == 3)
+            break;
+    }
+    return isbnList;
+}
 
-    var makerFunction = function (data, name, img) {
-        console.log(tmp = data);
+var map;
+// 초기 맵 , 현재 위치 설정
+async function initTmap() {
+    map = new Tmapv2.Map("map_div", {
+        center: new Tmapv2.LatLng(33.450701, 126.570667),
+        width: "100vw",
+        height: "100vh",
+        zoomControl: true,
+        scrollwheel: true
+    });
+
+    // 현재 위치 설정
+    initPresent();
+}
+
+var userLocation = [];
+
+// 현재 위치 설정
+function initPresent() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                var lat = position.coords.latitude;
+                var lon = position.coords.longitude;
+
+                map.setCenter(new Tmapv2.LatLng(lat, lon));
+                map.setZoom(16);
+                
+                userLocation = [lat, lon];
+            });
+    }
+}
+
+async function setStartName() {
+    document.getElementsByClassName('searchDepartBar')[0].value = "";
+    initPresent();
+    var res = await getBuildingName(userLocation[1], userLocation[0]);
+    res = res.addressInfo;
+    var buildingName;
+    if (res.buildingName.length != 0) {
+        buildingName = res.buildingName;
+    } else {
+        buildingName = res.gu_gun + ' ' + res.roadName + ' ' + res.buildingIndex;
+    }
+    
+    document.getElementsByClassName('searchDepartBar')[0].value = buildingName; //출발지
+    marker_s = new Tmapv2.Marker({
+        position: new Tmapv2.LatLng(userLocation[0], userLocation[1]),
+        icon: "http://tmapapi.sktelecom.com/upload/tmap/marker/pin_b_m_s.png",
+        iconSize: new Tmapv2.Size(24, 38),
+        map: map
+    });
+}
+
+var circleArr = []
+
+// 위치 기반 책 검색 및 마커 띄우기
+async function searchTmap(isbnList, searchRange) {
+
+    // 반경 설정 보이기
+
+    var circle = new Tmapv2.Circle({
+				center: new Tmapv2.LatLng(userLocation[0],userLocation[1]), // 중심좌표
+				radius: searchRange * 1050, // 원의 반지름. 크기설정
+				strokeColor: "black", // 테두리 색상
+                fillOpacity : 0.15,//투명도
+				fillColor: "white", // 원 내부 색상
+				map: map // 지도 객체
+			});
+    
+    circleArr.push(circle);
+
+    if (circleArr.length > 1)
+    {
+      circleArr[0].setMap(null);
+      circleArr = [];
+    }
+
+    var markerFunction = function(data, name, img) {
         const test = [
             [data, name, img]
         ]
-
+        console.log('inMarkerFunction,', data)
         var maxLength = 5;
-        // test = [
-        //     [returnYes24Info, 'yes24', './yes24.png'],
-        //     [returnGyoboInfo, 'gyobo', './kyobo.png'],
-        //     [returnYPInfo, 'YP', './example.png']
-        // ]
+
+        // 지도 마커 설정
+
         for (let i = 0; i < test.length; i++) {
             var parent = document.getElementsByClassName('bookSectionSources')[0];
 
             var bookBox = new Array(test[i][0].length);
-            var bookBrand = new Array(test[i][0].length);
             var bookInfo = new Array(test[i][0].length);
             var content = new Array(test[i][0].length);
 
-            var bookStoreInfo = new Array(test[i][0].length);
-            //var bookStoreClose = new Array(test[i][0].length);
-            //var bookStoreName = new Array(test[i][0].length);;
-            //var bookStoreTime = new Array(test[i][0].length);
-
-            var bookStoreDetail = new Array(test[i][0].length);
-            var bookStoreNum = new Array(test[i][0].length);
-            var bookStoreLink = new Array(test[i][0].length);
+            var bookStoreInfoHeader = new Array(test[i][0].length);
+            var bookStoreInfoName = new Array(test[i][0].length);
+            var bookStoreInfoTime = new Array(test[i][0].length);
+            var bookStoreInfoType = new Array(test[i][0].length);
+            var bookStoreInfoDay = new Array(test[i][0].length);
+            var bookStoreInfoNum = new Array(test[i][0].length);
+            var bookStoreInfoWrap = new Array(test[i][0].length);
 
             let marker_lat = new Array(test[i][0].length);
             let marker_lon = new Array(test[i][0].length);
 
-            console.log('lenlne', test[i][0]);
-            console.log('l',test[i][0].length);
-            for (let j = 0; j < test[i][0].length; j++) // returnYes24Info - >
+            for (let j = 0; j < test[i][0].length; j++)
             {
-
-               console.log('asdasd', test[i][0][j]['searchResult']) 
                 if (test[i][0][j]['searchResult'].length != 0) {
-                    content[j] = "<div class = 'result'>" +
+                    content[j] = `<div class = 'infoWindow' style = 'cursor : pointer;'>` +
 
-                        "<div class = 'header' style=' position: relative; width: 100%; height: 9rem; border-bottom : 0.1px solid grey; no-repeat center; display : flex; justify-content : space-around;'>" +
+                        "<div class = 'infoHeader' style=' position: relative; width: 100%; height: 9rem; border-bottom : 0.1px solid darkgrey; no-repeat center; display : flex;'>" +
 
-                        "<p style='margin-bottom: 0.7rem; overflow: hidden;'>" +
-                        `<span class='tit' style=' font-size: 1.6rem; font-weight: bold; '>${test[i][1]}</span>` +
+                        "<p style='overflow: hidden; padding : 1rem; width : 100%;'>" +
+                        `<span class='infoTitle' style=' font-size: 1.1rem; font-weight: bold; text-align : left;'>${test[i][0][j]["storeName"]}</span>` +
                         "<br>" +
                         "<br>" +
-                        `<span class='tit' style=' font-size: 1.6rem; font-weight: bold;'>${test[i][0][j]["storeName"]}</span>` +
+                        `<span class='infoTitle' style=' font-size: 1.1rem; font-weight: bold; display: inline-block; width : 100%; text-align : right;'>${test[i][0][j]['telNum']}</span>` +
                         "<br>" +
                         "</p>" +
-                        `<img src= ${test[i][2]} style = 'display : flex; width : 9.2rem; height : 6.3rem; margin-top : 10px;'>` +
-
                         "</div>" +
 
-                        "<div class='info-box' style='padding: 10px; height : auto;'>";
+                        "<div class='infoSection' style='width : 100%; padding: 10px; height : auto;'>";
 
+                        //${test[i][0][j]['searchResult'][k]['title']}
 
-                        for (var k = 0; k < test[i][0][j]['searchResult'].length; k++)
-                        {
-                          if (k == maxLength) break;
-                          content[j] += "<p style='margin-bottom: 0.7rem; overflow: hidden; display : flex; justify-content : space-around;'>" +
-                          `<span class='tit' style=' font-size: 1.6rem; font-weight: bold; text-align : left; width : 20rem; height : auto;'>${test[i][0][j]['searchResult'][k]['title']}</span>` +
-                          "<span style = 'width : 10rem;'>" +
-                          `<span class='tit' style=' font-size: 1.6rem; font-weight: bold;'>재고 : </span>` +
-                          `<span class='tit' style=' font-size: 1.6rem; font-weight: bold; text-align: right;'>${test[i][0][j]['searchResult'][k]['stock']}</span>` +
-                          "</span>" +
-                          "</p>";
-                        }
-
-                        content[j] += "<p style='margin-bottom: 0.7rem; overflow: hidden; display : flex; justify-content : space-around;'>" +
-                        `<span class='tit' style=' font-size: 1.6rem; font-weight: bold; text-align : center; width : 20rem; height : auto;'>전화번호 : ${test[i][0][j]['telNum']}</span>` +
-                        "</span>" +
-                        "</p>";
-                        "</div>" +
-                        "</div>";
+                    for (var k = 0; k < test[i][0][j]['searchResult'].length; k++) {
+                        if (k == maxLength) break;
+                        content[j] += "<p style='overflow: hidden; display : flex; justify-content : space-between; align-items : center;'>" +
+                            `<span class='infoTitle' style=' font-size: 1.1rem; font-weight: bold; text-align : left; width : 60%; height : auto; padding-top : 0.2rem;'>${test[i][0][j]['searchResult'][k]['title']}</span>` +
+                            "<span style = 'width : 30%; text-align : right;'>" +
+                            `<span class='infoTitle' style=' font-size: 1.1rem; font-weight: bold;'>재고 : </span>` +
+                            `<span class='infoTitle' style=' font-size: 1.1rem; font-weight: bold; text-align: right;'>${test[i][0][j]['searchResult'][k]['stock']}</span>` +
+                            "</span>" +
+                            "</p>";
+                    }
+                    content[j] += "</div>" +
+                    "</div>";
                 }
-
                 if (test[i][0][j]['searchResult'] == 0) {
-                    content[j] = "<div class = 'result'>" +
+                    content[j] = "<div class = 'infoWindow' style = 'cursor : pointer;'>" +
 
-                        "<div class = 'header' style=' position: relative; width: 100%; height: 9rem; border-bottom : 0.1px solid grey; no-repeat center; display : flex; justify-content : space-around;'>" +
+                        "<div class = 'infoHeader' style=' position: relative; width: 100%; height: 9rem; border-bottom : 0.1px solid grey; no-repeat center; display : flex; '>" +
 
-                        "<p style='margin-bottom: 0.7rem; overflow: hidden;'>" +
-                        `<span class='tit' style=' font-size: 1.6rem; font-weight: bold; '>${test[i][1]}</span>` +
+                        "<p style='overflow: hidden; padding : 1rem; width : 100%;'>" +
+                        `<span class='infoTitle' style=' font-size: 1.1rem; font-weight: bold; text-align : left;'>${test[i][0][j]["storeName"]}</span>` +
                         "<br>" +
                         "<br>" +
-
-                        `<span class='tit' style=' font-size: 1.6rem; font-weight: bold;'>${test[i][0][j]["storeName"]}</span>` +
+                        `<span class='infoTitle' style=' font-size: 1.1rem; font-weight: bold; display: inline-block; width : 100%; text-align : right;'>${test[i][0][j]['telNum']}</span>` +
                         "<br>" +
                         "</p>" +
-                        `<img src= ${test[i][2]} style = 'display : flex; width : 9.2rem; height : 6.3rem; margin-top : 10px;'>` +
-
                         "</div>" +
 
-                        "<div class='info-box' style='padding: 10px;'>" +
+                        "<div class='infoSection' style='padding: 10px;'>" +
 
-                        "<p style='margin-bottom: 0.7rem; overflow: hidden; display : flex; justify-content : space-around;'>" +
-                        `<span class='tit' style=' font-size: 1.6rem; font-weight: bold;'>${'-'}</span>` +
-                        "<span>" +
-                        `<span class='tit' style=' font-size: 1.6rem; font-weight: bold;'>재고 : </span>` +
-                        `<span class='tit' style=' font-size: 1.6rem; font-weight: bold;'>${'-'}</span>` +
+                        "<p style='overflow: hidden; display : flex; justify-content : space-between; align-items : center;'>" +
+                        `<span class='infoTitle' style=' font-size: 1.1rem; font-weight: bold; text-align : left; width : 70%; padding-top : 0.2rem;'>${'-'}</span>` +
+                        "<span style = 'width : 30%; text-align : right;'>" +
+                        `<span class='infoTitle' style=' font-size: 1.1rem; font-weight: bold;'>재고 : </span>` +
+                        `<span class='infoTitle' style=' font-size: 1.1rem; font-weight: bold;'>${'-'}</span>` +
                         "</span>" +
                         "</p>" +
-
-                        "<p style='margin-bottom: 0.7rem; overflow: hidden; display : flex; justify-content : space-around;'>" +
-                        `<span class='tit' style=' font-size: 1.6rem; font-weight: bold; text-align : left; width : 20rem; height : auto;'>전화번호 : ${test[i][0][j]['telNum']}</span>` +
-                        "</span>" +
-
                         "</div>" +
                         "</div>";
                 }
 
-                //Popup 객체 생성.
+                //Popup 객체 생성
+
                 infoWindow = new Array(test[i][0].length);
                 infoWindow[j] = new Tmapv2.InfoWindow({
-                    position: new Tmapv2.LatLng(test[i][0][j]["lat"], test[i][0][j]["lon"]), //Popup 이 표출될 맵 좌표
-                    content: content[j], //Popup 표시될 text
-                    border: '0px solid #FF0000',
-                    background: false, //Popup의 테두리 border 설정.
-                    type: 2, //Popup의 type 설정.
-                    map: map //Popup이 표시될 맵 객체
-                });
-                marker = new Array(test[i][0].length);
-                marker[j] = new Tmapv2.Marker({
                     position: new Tmapv2.LatLng(test[i][0][j]["lat"], test[i][0][j]["lon"]),
-                    map: map,
-                    //icon: "./images./ballon.png",
-                    zIndex: 0
+                    content: content[j],
+                    border: '0px solid #FF0000',
+                    background: false,
+                    type: 2,
+                    map: map
                 });
 
-                map.setCenter(new Tmapv2.LatLng(37.55992471363162, 126.84031158500693));
-                map.zoomOut();
-                map.zoomOut();
+                // 마커 클릭 이벤트 생성
+                document.getElementsByClassName('infoWindow')[j].onclick = function() {
+                    var endPos = new Tmapv2.LatLng(marker_lat[j], marker_lon[j]);
+
+                    document.getElementsByClassName('searchArriveBarValue')[0].value = endPos;
+                    console.log("endPos", endPos);
+                    document.getElementsByClassName('searchArriveBar')[0].value = test[i][1] + " " + test[i][0][j]["storeName"];
+                    recommendWayDir();
+                };
+
+                map.setCenter(new Tmapv2.LatLng(userLocation[0], userLocation[1]));
+                map.setZoom(10);
+
+                // 도서 제공처 내용 출력
 
                 // bookbox
                 bookBox[j] = document.createElement('div');
 
-                bookBox[j].setAttribute('class','bookSectionSource1');
+                bookBox[j].setAttribute('class', 'bookSectionSource1');
                 bookBox[j].style.padding = "1.5rem";
                 bookBox[j].style.cursor = "pointer";
 
@@ -236,165 +244,89 @@ async function initTmap(IsbnLists, searchRange) {
                 // bookInfo
 
                 bookInfo[j] = document.createElement('div');
-                bookStoreNum[j] = document.createElement('div');
                 bookInfo[j].style.display = "flex";
-                bookInfo[j].style.justifyContent = "space-around";
-                bookInfo[j].style.alignItems = "center";
+                bookInfo[j].style.flexDirection = "column";
+                bookInfo[j].style.alignItems = "left";
                 bookBox[j].appendChild(bookInfo[j]);
 
                 // bookbrand
 
-                bookBrand[j] = document.createElement('div');
-                bookBrand[j].style.backgroundImage =`url(${test[i][2]})`;
-                bookBrand[j].style.backgroundSize = "12rem 12rem";
-                bookBrand[j].style.height = "12rem";
-                bookBrand[j].style.width = "12rem";
-                bookBrand[j].style.marginRight = "2rem";
-                bookInfo[j].appendChild(bookBrand[j]);
-
                 // bookStoreInfo
 
-                bookStoreInfo[j] = document.createElement('div');
-                bookInfo[j].appendChild(bookStoreInfo[j]);
+                bookStoreInfoHeader[j] = document.createElement('div');
+                bookInfo[j].appendChild(bookStoreInfoHeader[j]);
 
-                bookStoreInfo[j].innerHTML = `${test[i][1]}` + '\n' + `${test[i][0][j]["storeName"]}`+'<br><br>' + "영업 시간 : " + `${test[i][0][j]["operatingTime"]}` + '<br><br>' + "휴일 : " + `${test[i][0][j]["closedDay"]}`;
+                bookStoreInfoName[j] = document.createElement('a');
+                bookStoreInfoName[j].setAttribute('class', 'bookStoreInfoName');
+                bookStoreInfoHeader[j].appendChild(bookStoreInfoName[j]);
 
-                bookStoreInfo[j].style.height = "auto";
-                bookStoreInfo[j].style.width = "20rem";
-                bookStoreInfo[j].style.textAlign = "left";
+                bookStoreInfoName[j].innerHTML = `${test[i][0][j]["storeName"]}` + '\n' + '\n';
 
-                // bookStoreDetail
+                bookStoreInfoName[j].style.height = "auto";
+                bookStoreInfoName[j].style.width = "auto";
+                bookStoreInfoName[j].style.textAlign = "left";
+                console.log('testURL!!!!', test[i][0][j]["url"])
+                console.log('test!!!', test)
+                // $(".bookStoreInfoName").attr("href", `${test[i][0][j]["url"]}`);
+                bookStoreInfoName[j].setAttribute("href", `${test[i][0][j]["url"]}`);
 
-                bookStoreDetail[j] = document.createElement('div');
-                bookBox[j].appendChild(bookStoreDetail[j]);
+                bookStoreInfoType[j] = document.createElement('span');
+                bookStoreInfoType[j].setAttribute('class', 'bookStoreInfoType');
+                bookStoreInfoHeader[j].appendChild(bookStoreInfoType[j]);
 
-                bookStoreDetail[j].style.display = "flex";
-                bookStoreDetail[j].style.justifyContent = "space-between";
-                bookStoreDetail[j].style.marginTop = "0.5rem";
+                bookStoreInfoType[j].innerHTML = `${test[i][1]}` + '<p style = "margin-top : 2rem;"> </p>';
 
-                // bookStoreNum
+                bookStoreInfoType[j].style.height = "auto";
+                bookStoreInfoType[j].style.width = "auto";
+                bookStoreInfoType[j].style.textAlign = "left";
 
-                bookStoreNum[j] = document.createElement('div');
-                bookStoreDetail[j].appendChild(bookStoreNum[j]);
+                bookStoreInfoTime[j] = document.createElement('div');
+                bookStoreInfoTime[j].setAttribute('class', 'bookStoreInfoTime');
+                bookInfo[j].appendChild(bookStoreInfoTime[j]);
 
-                bookStoreNum[j].innerHTML = "Tel." + `${test[i][0][j]["telNum"]}`;
-                bookStoreNum[j].style.marginLeft = "0.5rem";
+                bookStoreInfoTime[j].innerHTML = `${test[i][0][j]["operatingTime"]}` + '<p style = "margin-top : 0.8rem;"> </p>';
 
+                bookStoreInfoTime[j].style.height = "auto";
+                bookStoreInfoTime[j].style.width = "auto";
+                bookStoreInfoTime[j].style.textAlign = "left";
 
-                // bookStoreLink
+                bookStoreInfoDay[j] = document.createElement('div');
+                bookStoreInfoDay[j].setAttribute('class', 'bookStoreInfoTime');
+                bookInfo[j].appendChild(bookStoreInfoDay[j]);
 
-                bookStoreLink[j] = document.createElement('a');
-                bookStoreDetail[j].appendChild(bookStoreLink[j]);
-                bookStoreLink[j].id = "detail";
-                bookStoreLink[j].style.cursor = "pointer";
-                //console.log (`${test[i][0][j]["url"]}`);
-                bookStoreLink[j].innerHTML = "홈페이지";
-                bookStoreLink[j].setAttribute('class', 'button');
+                bookStoreInfoDay[j].innerHTML = `${test[i][0][j]["closedDay"]}` + '<br><br>';
 
+                bookStoreInfoWrap[j] = document.createElement('div');
+                bookStoreInfoWrap[j].setAttribute('class', 'bookStoreInfoWrap');
+                bookInfo[j].appendChild(bookStoreInfoWrap[j]);
 
-                $(".button").attr("href", `${test[i][0][j]["url"]}`)
+                bookStoreInfoNum[j] = document.createElement('div');
+                bookStoreInfoNum[j].setAttribute('class', 'bookStoreInfoNum');
+                bookStoreInfoWrap[j].appendChild(bookStoreInfoNum[j]);
+
+                bookStoreInfoNum[j].innerHTML = `${test[i][0][j]["telNum"]}`;
+
+                bookStoreInfoNum[j].style.height = "auto";
+                bookStoreInfoNum[j].style.width = "auto";
+                bookStoreInfoNum[j].style.textAlign = "left";
 
                 marker_lat[j] = test[i][0][j]["lat"];
                 marker_lon[j] = test[i][0][j]["lon"];
 
+                // 도서 제공처 클릭 이동 함수
                 bookBox[j].addEventListener('click', function() {
-
-
-                map.setZoom(16);
-                map.panTo(new Tmapv2.LatLng(marker_lat[j], marker_lon[j]))
-
-                console.log(marker_lat[j], marker_lon[j])
-              });
+                    map.setCenter(new Tmapv2.LatLng(marker_lat[j], marker_lon[j]));
+                    map.setZoom(19);
+                });
             }
         }
     }
 
-
-    // 이것이 자바다
-    startYes24(['9788968481475', '9788968481123'], 0, searchRange ,makerFunction)
-    aladinStart(['9788968481024', '9788968481475', '9791162243770', '9791162243077', '9791162242780'],0,searchRange,makerFunction);
-    startIndependentStore(0,0,searchRange,makerFunction);
-    // pubLibStart(['9788968481024', '9788968481475', '9791162243770', '9791162243077', '9791162242780','9788968481123'],0,99999999,makerFunction);
-    startGyobo(['9788968481475', '9788968481123', '9788968481123'], 0, searchRange, makerFunction)
-    startYPbooks(0, searchRange, makerFunction)
-    console.log("isbnlist", IsbnLists);
-    console.log("range", searchRange);
+    console.log("isbN", isbnList);
+    //startYes24(isbnList, userLocation, searchRange, markerFunction);
+    //startPublicLib(isbnList, userLocation, searchRange, markerFunction);
+    startGyobo(isbnList, userLocation, searchRange, markerFunction);
+    // startAladin(isbnList, userLocation, searchRange, markerFunction);
+    //startIndependentStore(isbnList, userLocation, searchRange, markerFunction);
+    // startYPbooks(userLocation, searchRange, markerFunction);
 }
-
-function toggleBar(id, toggleId, toggleIdTwo) {
-    obj = document.getElementById(id);
-    toggleObj = document.getElementById(toggleId);
-    toggleObjTwo = document.getElementById(toggleIdTwo);
-
-    if (obj.style.display == "block") {
-        obj.style.display = "none";
-        toggleObj.style.display = "none";
-        toggleObjTwo.style.display = "block";
-        toggleObjTwo.style.left = 0;
-    } else {
-        obj.style.display = "block";
-        toggleObj.style.display = "block";
-        toggleObjTwo.style.display = "none";
-        toggleObj.style.left = "38.5rem";
-    }
-}
-
-function getTitle()
-{
-  var title = document.getElementsByClassName('bookSearchBar')[0].value;
-  var searchRange = document.getElementsByClassName('slider')[0].value;
-  //console.log("range", searchRange);
-
-  var IsbnLists = getIsbnList(title);
-
-  initTmap(IsbnLists, searchRange);
-}
-
-function getIsbnList(title, pageSize = 10) {
-
-    console.log(title);
-    if (title.length == 0)
-        return;
-    var lists = [];
-    var isbn = '';
-    var result = '';
-    var totalCount = '';
-    let url =
-        "https://www.nl.go.kr/seoji/SearchApi.do?cert_key=26946e3d5253c3fa71ccf451aeab972c7a303cbdc213c80c7306c9d1374255b9&title=" +
-        title + "&result_style=json&page_no=1&page_size=" + pageSize;
-    fetch(url)
-        .then(res => res.json())
-        .then(resJson => {
-            totalCount = parseInt(resJson['TOTAL_COUNT']);
-            result = resJson['docs'];
-            if (pageSize > totalCount)
-                pageSize = totalCount;
-            if (totalCount > 0) {
-                var i = 0;
-                var count = 0;
-                for (i = 0; i < pageSize; i++) {
-                    isbn = result[i]['EA_ISBN'];
-                    if (isbn.length == 0) {
-                        continue;
-                    }
-                    lists[count++] = isbn;
-                }
-            } else {
-                console.log("찾는 자료가 없습니다!");
-            }
-        });
-        console.log(lists);
-        return lists;
-}
-
-// 반경 설정 출력 함수
-
-function rangeView()
-{
-  var value = document.getElementsByClassName('rangeValue')[0];
-  var rangeBar = document.getElementsByClassName('slider')[0];
-
-  value.innerHTML = rangeBar.value;
-}
-
-//
