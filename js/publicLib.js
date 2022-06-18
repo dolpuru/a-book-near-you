@@ -1,6 +1,7 @@
 //isbn의 리스트와 userLocation, searchRange, makerFunction을 받아 공공도서관의
 //재고 정보 검색을 시작합니다.
 async function startPublicLib(isbn, userLocation, searchRange, markerFunction) {
+    
     var jsonStore = [];
     var link = 'http://data4library.kr/api/libSrch?authKey=3fd583e1d01ecad03bcfd4a9476a5a7e08b19ed817ef17dbab371f3ad097c73e&pageNo=1&pageSize=1';
     var res = await getPublicLibRequest(link);

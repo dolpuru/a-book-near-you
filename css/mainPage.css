@@ -413,7 +413,7 @@ header {
 }
 
 .detailedGuide {
-  height: 59vh;
+  height: 61vh;
   overflow: scroll;
   overflow-x: hidden;
   border-bottom: 1px solid #cfcfcf;

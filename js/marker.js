@@ -14,8 +14,8 @@ function presentMarker() {
 }
 
 // 현재 위치를 건물명, 주소지로 변환
-function getBuildingName(lon, lat) {
-    return $.ajax({
+async function getBuildingName(lon, lat) {
+    return await $.ajax({
         method: "GET",
         url: "https://apis.openapi.sk.com/tmap/geo/reversegeocoding?version=1&format=json&callback=result",
         async: false,
@@ -44,7 +44,7 @@ async function makeMarker(evt) {
     var markerPosition = new Tmapv2.LatLng(
         mapLatLng._lat, mapLatLng._lng);
     //마커 올리기
-    marker1 = new Tmapv2.Marker({
+    var marker1 = new Tmapv2.Marker({
         position: markerPosition,
         icon: "http://tmapapi.sktelecom.com/upload/tmap/marker/pin_b_m_p.png",
         iconSize: new Tmapv2.Size(24, 38),
@@ -52,6 +52,7 @@ async function makeMarker(evt) {
     });
 
     preMarkerArr.push(marker1);
+    resultMarkerArr.push(marker1);
 
     var res = await getBuildingName(mapLatLng._lng, mapLatLng._lat);
     res = res.addressInfo;
@@ -65,7 +66,6 @@ async function makeMarker(evt) {
     document.getElementsByClassName('searchDepartBarValue')[0].value = markerPosition; //위도, 경도값 넣기
     document.getElementsByClassName('searchDepartBar')[0].value = buildingName; //출발지
     userLocation = [mapLatLng._lat, mapLatLng._lng];
-    //saveStartX =  [mapLatLng._lat, mapLatLng._lng];
     console.log(userLocation);
     document.getElementsByTagName('body')[0].style.cursor = "default"
     clearMarker();
