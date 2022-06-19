@@ -1,5 +1,5 @@
 // 책 제목을 받아 지도 검색
-async function getBookTitle() {
+async function startSearch() {
     var bookTitle = document.getElementsByClassName('bookSearchBar')[0].value;
     var searchRange = document.getElementsByClassName('slider')[0].value;
     var isbnList = await getIsbnList(bookTitle);
@@ -338,7 +338,7 @@ async function searchTmap(isbnList, searchRange) {
     
     //속도가 느린거부터 call => 공공도서관(매우 느림), 독립도서관(빠른데 많음)
     console.log("isbN", isbnList);
-    //startPublicLib(isbnList, userLocation, searchRange, markerFunction);
+    startPublicLib(isbnList, userLocation, searchRange, markerFunction);
     startYes24(isbnList, userLocation, searchRange, markerFunction);
     startGyobo(isbnList, userLocation, searchRange, markerFunction);
     startAladin(isbnList, userLocation, searchRange, markerFunction);
