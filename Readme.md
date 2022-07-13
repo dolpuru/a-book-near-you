@@ -10,8 +10,8 @@
 <h2> 이렇게 개발했어요 ! </h2>
 <h6>서버 없는 프로젝트이며, 협업을 위해 특정 함수에 넘겨줄 파라메타를 아래와 같이 지정해 협업을 할 수 있었어요 ! </h6>
 
-<p align="center"><img src="./gif_for_read-me/img3.gif" width="600" height="294"/></p>
-<p align="center"><img src="./gif_for_read-me/img4.gif" width="600" height="294"/></p>
+<p align="center"><img src="./gif_for_read-me/img3.PNG" width="600" height="294"/></p>
+<p align="center"><img src="./gif_for_read-me/img4.PNG" width="600" height="294"/></p>
 
 
 
